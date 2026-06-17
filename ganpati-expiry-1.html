@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GANPATI – Expiry Scanner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --gold: #FFD700;
+    --gold2: #FFA500;
+    --orange: #FF6B00;
+    --green: #00FF88;
+    --red: #FF3B3B;
+    --blue: #00BFFF;
+    --purple: #A855F7;
+    --pink: #FF69B4;
+    --bg: #0A0A0F;
+    --card-bg: #111118;
+    --border: #2A2A40;
+    --text: #E0E0E0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    background: #0D0D18;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    height: 28px;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-track {
+    display: flex;
+    animation: ticker 28s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-track:hover { animation-play-state: paused; }
+  .tick-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 0 22px;
+    letter-spacing: .5px;
+  }
+  .tick-item .sym { color: #aaa; }
+  .tick-item .price { color: #fff; font-weight: 700; }
+  .tick-item .up   { color: var(--green); }
+  .tick-item .dn   { color: var(--red);   }
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0D0D18 0%, #12101E 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 10px 14px 8px;
+    position: relative;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--gold), var(--orange), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 3px;
+    text-shadow: none;
+    position: relative;
+  }
+  .brand-sub {
+    font-size: 10px;
+    color: var(--gold2);
+    letter-spacing: 2px;
+    font-family: 'Rajdhani', sans-serif;
+    margin-top: -2px;
+  }
+  .ganesh-icon { font-size: 28px; filter: drop-shadow(0 0 8px var(--gold)); }
+
+  /* phase badge */
+  .phase-badge {
+    background: var(--gold);
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  /* api row */
+  .api-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 7px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .api-label { color: var(--orange); font-weight: 700; }
+  .api-source { color: #999; }
+
+  /* live row */
+  .live-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    color: #777;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  .live-tag { color: var(--green); font-weight: 700; }
+  .live-time { color: var(--gold); font-weight: 700; }
+  @keyframes pulse {
+    0%,100% { opacity:1; box-shadow: 0 0 6px var(--green); }
+    50%      { opacity:.4; box-shadow: 0 0 12px var(--green); }
+  }
+
+  /* ── SUMMARY BAR ── */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 0;
+    margin: 10px 10px 0;
+    border: 1.5px solid var(--gold2);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #0D0D18;
+  }
+  .sum-cell {
+    padding: 10px 6px;
+    text-align: center;
+    border-right: 1px solid #2a2a40;
+    position: relative;
+  }
+  .sum-cell:last-child { border-right: none; }
+  .sum-val {
+    font-family: 'Orbitron', monospace;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .sum-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #888;
+    margin-top: 3px;
+  }
+  .val-buy  { color: var(--green); }
+  .val-sell { color: var(--red); }
+  .val-wait { color: var(--gold); }
+  .val-total{ color: var(--blue); }
+
+  /* ── EXPIRY CLOCK ── */
+  .expiry-clock {
+    margin: 10px 10px 0;
+    background: linear-gradient(90deg, #1A0A00, #0D0D18, #001A0A);
+    border: 1px solid #2a2a40;
+    border-left: 3px solid var(--orange);
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .ec-label { color: #888; }
+  .ec-time { color: var(--gold); font-weight: 700; font-size: 13px; }
+  .ec-expiry { color: var(--orange); font-weight: 700; }
+  .ec-lot { color: var(--blue); }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    padding: 12px 12px 6px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #555;
+    font-family: 'Share Tech Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #2a2a40, transparent);
+  }
+
+  /* ── SCANNER GRID ── */
+  .scanner-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 10px 10px;
+  }
+
+  .scanner-card {
+    background: var(--card-bg);
+    border: 1.5px solid #2A2A40;
+    border-radius: 10px;
+    padding: 12px 10px 10px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+  }
+  .scanner-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--gold);
+  }
+  .scanner-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 10px 10px 0 0;
+  }
+  .card-gamma::before  { background: linear-gradient(90deg, var(--gold), var(--orange)); }
+  .card-vega::before   { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+  .card-pcr::before    { background: linear-gradient(90deg, var(--blue), #0055aa); }
+  .card-oi::before     { background: linear-gradient(90deg, #00cc66, #004422); }
+  .card-maxpain::before{ background: linear-gradient(90deg, var(--red), #880000); }
+  .card-theta::before  { background: linear-gradient(90deg, #00BFFF, #8800ff); }
+
+  /* status badge */
+  .status-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+  .badge-wait  { background: var(--gold2); color: #000; }
+  .badge-buy   { background: var(--green); color: #000; }
+  .badge-sell  { background: var(--red); color: #fff; }
+  .badge-live  { background: #003300; color: var(--green); border: 1px solid var(--green); }
+
+  /* card icon */
+  .card-icon {
+    font-size: 30px;
+    margin-bottom: 6px;
+    display: block;
+    filter: drop-shadow(0 0 6px rgba(255,200,0,.3));
+  }
+
+  .card-type {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: #555;
+    margin-bottom: 2px;
+  }
+  .card-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ddd;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  /* live indicator in card */
+  .card-live-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+    font-size: 10px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .card-live-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 5px var(--green);
+    animation: pulse 1.4s infinite;
+  }
+  .card-live-text { color: var(--green); font-size: 10px; }
+
+  /* progress bar */
+  .prog-wrap {
+    height: 3px;
+    background: #1e1e2e;
+    border-radius: 2px;
+    margin-bottom: 5px;
+  }
+  .prog-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+  .prog-gamma  { background: linear-gradient(90deg, var(--gold), var(--orange)); }
+  .prog-vega   { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+  .prog-pcr    { background: linear-gradient(90deg, var(--blue), #0055aa); }
+  .prog-oi     { background: linear-gradient(90deg, #00cc66, #004422); }
+  .prog-maxpain{ background: linear-gradient(90deg, var(--red), #880000); }
+  .prog-theta  { background: linear-gradient(90deg, #00BFFF, #8800ff); }
+
+  .prog-stats {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: #555;
+  }
+
+  /* card mini value */
+  .card-mini {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #666;
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid #1e1e2e;
+  }
+  .card-mini span { color: var(--gold2); }
+
+  /* ── SIGNALS BUTTON ── */
+  .signals-btn-wrap {
+    padding: 8px 12px 12px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .signals-btn {
+    background: linear-gradient(135deg, var(--gold2), var(--gold));
+    color: #000;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 24px;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(255,165,0,.4);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .signals-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 28px rgba(255,165,0,.6);
+  }
+  .sig-count {
+    background: #000;
+    color: var(--gold);
+    border-radius: 50%;
+    width: 24px; height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: sticky;
+    bottom: 0;
+    background: #0D0D18;
+    border-top: 1px solid #2a2a40;
+    display: flex;
+    padding: 6px 0 12px;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding: 6px 4px;
+    border-radius: 8px;
+    transition: background .15s;
+  }
+  .nav-item:hover { background: #1a1a2e; }
+  .nav-item.active {
+    background: #1a1206;
+  }
+  .nav-icon { font-size: 18px; }
+  .nav-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: #555;
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .nav-item.active .nav-label { color: var(--gold); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: #111118;
+    border: 1.5px solid var(--gold2);
+    border-radius: 18px 18px 0 0;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px 16px 30px;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    color: var(--gold);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-close {
+    margin-left: auto;
+    background: none;
+    border: 1px solid #333;
+    color: #aaa;
+    border-radius: 50%;
+    width: 26px; height: 26px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #1e1e2e;
+    font-size: 13px;
+  }
+  .detail-key { color: #777; font-family: 'Share Tech Mono', monospace; font-size: 11px; }
+  .detail-val { color: #ddd; font-weight: 700; }
+  .detail-val.positive { color: var(--green); }
+  .detail-val.negative { color: var(--red); }
+  .detail-val.warning  { color: var(--gold); }
+  .modal-desc {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.7;
+    font-family: 'Share Tech Mono', monospace;
+    border-left: 3px solid var(--gold2);
+    padding-left: 10px;
+  }
+
+  /* ── GREEK PILLS ── */
+  .greek-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0 4px;
+  }
+  .greek-pill {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+  }
+  .pill-delta  { background: #001a33; color: var(--blue); border: 1px solid #005599; }
+  .pill-gamma  { background: #1a1000; color: var(--gold); border: 1px solid #885500; }
+  .pill-theta  { background: #1a0000; color: var(--red);  border: 1px solid #880000; }
+  .pill-vega   { background: #1a0033; color: var(--purple); border: 1px solid #6600aa; }
+
+  /* responsive for desktop */
+  @media (min-width: 500px) {
+    body { max-width: 420px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── TICKER ── -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- duplicated for seamless loop -->
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="ganesh-icon">🐘</span>
+        <div>
+          <div class="brand-name">GANPATI</div>
+          <div class="brand-sub">EXPIRY SCANNER · 6 ALGORITHMS</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+      <span class="phase-badge">PHASE 3</span>
+      <span style="font-size:10px; color:#555; font-family:'Share Tech Mono',monospace;">NSE F&O</span>
+    </div>
+  </div>
+
+  <div class="api-row">
+    <span style="font-size:12px;">🔗</span>
+    <span class="api-label">API SOURCE</span>
+    <span class="api-source">NSE Option Chain / Yahoo Finance – Phase 3 rea…</span>
+  </div>
+
+  <div class="live-row">
+    <span>⚡</span>
+    <span style="color:#555; font-size:11px;">GANPATI GROUP · 6 EXPIRY ALGORITHMS · LITE BUILD</span>
+    <div class="live-dot"></div>
+    <span class="live-tag">LIVE</span>
+    <span class="live-time" id="liveTime">--:--:-- am</span>
+  </div>
+</div>
+
+<!-- ── SUMMARY BAR ── -->
+<div class="summary-bar">
+  <div class="sum-cell">
+    <div class="sum-val val-buy" id="buyCount">0</div>
+    <div class="sum-label">BUY</div>
+  </div>
+  <div class="sum-cell">
+    <div class="sum-val val-sell" id="sellCount">0</div>
+    <div class="sum-label">SELL</div>
+  </div>
+  <div class="sum-cell">
+    <div class="sum-val val-wait" id="waitCount">6</div>
+    <div class="sum-label">WAIT</div>
+  </div>
+  <div class="sum-cell">
+    <div class="sum-val val-total">6</div>
+    <div class="sum-label">TOTAL</div>
+  </div>
+</div>
+
+<!-- ── EXPIRY CLOCK ── -->
+<div class="expiry-clock">
+  <div>
+    <div class="ec-label">NIFTY EXPIRY</div>
+    <div class="ec-expiry" id="expiryDate">TUESDAY WEEKLY</div>
+  </div>
+  <div style="text-align:center">
+    <div class="ec-label">TIME LEFT</div>
+    <div class="ec-time" id="expiryCountdown">--h --m --s</div>
+  </div>
+  <div style="text-align:right">
+    <div class="ec-label">LOT SIZE</div>
+    <div class="ec-lot">65 Units</div>
+  </div>
+</div>
+
+<!-- ── SCANNER GRID ── -->
+<div class="section-title">EXPIRY SCANNERS · 6 LIVE</div>
+
+<div class="scanner-grid">
+
+  <!-- 1. GAMMA BLAST -->
+  <div class="scanner-card card-gamma" onclick="openModal('gamma')">
+    <span class="status-badge badge-wait">WAIT</span>
+    <span class="card-icon">⚡</span>
+    <div class="card-type">SCANNER</div>
+    <div class="card-name">GAMMA<br>BLAST</div>
+    <div class="card-live-row">
+      <div class="card-live-dot"></div>
+      <span class="card-live-text">LIVE</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar prog-gamma" id="pg-gamma" style="width:0%"></div></div>
+    <div class="prog-stats"><span style="color:#444">0%</span><span>0/100</span></div>
+    <div class="card-mini">γ &gt; 0.002 ATM · <span>PCR &lt; 0.7</span></div>
+  </div>
+
+  <!-- 2. VEGA CRUSH -->
+  <div class="scanner-card card-vega" onclick="openModal('vega')">
+    <span class="status-badge badge-wait">WAIT</span>
+    <span class="card-icon">💜</span>
+    <div class="card-type">SCANNER</div>
+    <div class="card-name">VEGA<br>CRUSH</div>
+    <div class="card-live-row">
+      <div class="card-live-dot"></div>
+      <span class="card-live-text">LIVE</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar prog-vega" id="pg-vega" style="width:0%"></div></div>
+    <div class="prog-stats"><span style="color:#444">0%</span><span>0/100</span></div>
+    <div class="card-mini">IV CRUSH · <span>Vega Decay</span></div>
+  </div>
+
+  <!-- 3. PCR ANALYZER -->
+  <div class="scanner-card card-pcr" onclick="openModal('pcr')">
+    <span class="status-badge badge-wait">WAIT</span>
+    <span class="card-icon">📊</span>
+    <div class="card-type">SCANNER</div>
+    <div class="card-name">PCR<br>ANALYZER</div>
+    <div class="card-live-row">
+      <div class="card-live-dot"></div>
+      <span class="card-live-text">LIVE</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar prog-pcr" id="pg-pcr" style="width:0%"></div></div>
+    <div class="prog-stats"><span style="color:#444">0%</span><span>0/100</span></div>
+    <div class="card-mini">PUT/CALL RATIO · <span>OI Bias</span></div>
+  </div>
+
+  <!-- 4. OI WALL -->
+  <div class="scanner-card card-oi" onclick="openModal('oi')">
+    <span class="status-badge badge-wait">WAIT</span>
+    <span class="card-icon">🏦</span>
+    <div class="card-type">SCANNER</div>
+    <div class="card-name">OI WALL<br>DETECTOR</div>
+    <div class="card-live-row">
+      <div class="card-live-dot"></div>
+      <span class="card-live-text">LIVE</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar prog-oi" id="pg-oi" style="width:0%"></div></div>
+    <div class="prog-stats"><span style="color:#444">0%</span><span>0/100</span></div>
+    <div class="card-mini">MAX OI STRIKE · <span>S/R Walls</span></div>
+  </div>
+
+  <!-- 5. MAX PAIN -->
+  <div class="scanner-card card-maxpain" onclick="openModal('maxpain')">
+    <span class="status-badge badge-wait">WAIT</span>
+    <span class="card-icon">🎯</span>
+    <div class="card-type">SCANNER</div>
+    <div class="card-name">MAX PAIN<br>TRACKER</div>
+    <div class="card-live-row">
+      <div class="card-live-dot"></div>
+      <span class="card-live-text">LIVE</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar prog-maxpain" id="pg-maxpain" style="width:0%"></div></div>
+    <div class="prog-stats"><span style="color:#444">0%</span><span>0/100</span></div>
+    <div class="card-mini">GRAVITY PULL · <span>Expiry Target</span></div>
+  </div>
+
+  <!-- 6. THETA DECAY -->
+  <div class="scanner-card card-theta" onclick="openModal('theta')">
+    <span class="status-badge badge-wait">WAIT</span>
+    <span class="card-icon">⏳</span>
+    <div class="card-type">SCANNER</div>
+    <div class="card-name">THETA<br>DECAY</div>
+    <div class="card-live-row">
+      <div class="card-live-dot"></div>
+      <span class="card-live-text">LIVE</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar prog-theta" id="pg-theta" style="width:0%"></div></div>
+    <div class="prog-stats"><span style="color:#444">0%</span><span>0/100</span></div>
+    <div class="card-mini">TIME DECAY · <span>ATM Premium</span></div>
+  </div>
+
+</div>
+
+<!-- ── SIGNALS BUTTON ── -->
+<div class="signals-btn-wrap">
+  <button class="signals-btn" onclick="openModal('signals')">
+    🔮 SIGNALS
+    <span class="sig-count" id="sigCount">0</span>
+  </button>
+</div>
+
+
+
+<!-- ── MODALS ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-sheet" id="modalSheet"></div>
+</div>
+
+<script>
+// ───────────────── TICKER DATA ─────────────────
+const tickers = [
+  { sym:'NIFTY', price:'24,180', chg:'+0.38%', up:true },
+  { sym:'BANKNIFTY', price:'51,420', chg:'+0.52%', up:true },
+  { sym:'RELIANCE', price:'2,945', chg:'+0.45%', up:true },
+  { sym:'HDFCBANK', price:'1,712', chg:'-0.12%', up:false },
+  { sym:'TCS', price:'4,210', chg:'+0.28%', up:true },
+  { sym:'INFY', price:'1,845', chg:'-0.09%', up:false },
+  { sym:'ITC', price:'468', chg:'+1.12%', up:true },
+  { sym:'SBIN', price:'832', chg:'+0.78%', up:true },
+  { sym:'TATAMOTORS', price:'1,140', chg:'-0.31%', up:false },
+  { sym:'FINNIFTY', price:'23,650', chg:'+0.44%', up:true },
+  { sym:'MIDCPNIFTY', price:'11,820', chg:'+0.67%', up:true },
+];
+
+function buildTicker() {
+  const track = document.getElementById('tickerTrack');
+  const html = [...tickers, ...tickers].map(t => `
+    <span class="tick-item">
+      <span class="sym">${t.sym} </span>
+      <span class="price">${t.price}</span>
+      <span class="${t.up?'up':'dn'}"> ${t.chg}</span>
+    </span>`).join('');
+  track.innerHTML = html;
+}
+buildTicker();
+
+// ───────────────── LIVE CLOCK ─────────────────
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const ampm = h >= 12 ? 'pm' : 'am';
+  h = h % 12 || 12;
+  document.getElementById('liveTime').textContent =
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} ${ampm}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ───────────────── EXPIRY COUNTDOWN ─────────────────
+function getNextTuesdayExpiry() {
+  const now = new Date();
+  // Market expiry: next Tuesday 3:30 PM IST
+  const d = new Date(now);
+  const day = d.getDay(); // 0=Sun, 2=Tue
+  let daysUntilTue = (2 - day + 7) % 7 || 7;
+  d.setDate(d.getDate() + daysUntilTue);
+  d.setHours(15, 30, 0, 0);
+  return d;
+}
+
+function updateExpiry() {
+  const expiry = getNextTuesdayExpiry();
+  const now = new Date();
+  let diff = Math.max(0, expiry - now);
+  const h = Math.floor(diff / 3600000); diff %= 3600000;
+  const m = Math.floor(diff / 60000);   diff %= 60000;
+  const s = Math.floor(diff / 1000);
+  document.getElementById('expiryCountdown').textContent =
+    `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+  // Show date
+  const opts = { weekday:'short', month:'short', day:'numeric' };
+  document.getElementById('expiryDate').textContent = expiry.toLocaleDateString('en-IN', opts).toUpperCase();
+}
+setInterval(updateExpiry, 1000);
+updateExpiry();
+
+// ───────────────── SIMULATE SCANNING ─────────────────
+const scanners = ['gamma','vega','pcr','oi','maxpain','theta'];
+const progState = {};
+scanners.forEach(s => progState[s] = 0);
+
+let scanRunning = false;
+function runScan() {
+  if (scanRunning) return;
+  scanRunning = true;
+  scanners.forEach(s => { progState[s] = 0; });
+
+  const interval = setInterval(() => {
+    let allDone = true;
+    scanners.forEach(s => {
+      if (progState[s] < 100) {
+        progState[s] += Math.random() * 8;
+        if (progState[s] > 100) progState[s] = 100;
+        const el = document.getElementById('pg-' + s);
+        if (el) el.style.width = progState[s].toFixed(0) + '%';
+        allDone = false;
+      }
+    });
+    if (allDone) {
+      clearInterval(interval);
+      scanRunning = false;
+      // random signals
+      const signals = Math.floor(Math.random() * 5);
+      document.getElementById('sigCount').textContent = signals;
+      if (signals > 0) {
+        document.getElementById('buyCount').textContent = Math.floor(signals / 2);
+        document.getElementById('sellCount').textContent = signals - Math.floor(signals / 2);
+        document.getElementById('waitCount').textContent = 6 - signals;
+      }
+    }
+  }, 120);
+}
+
+// Auto scan on load
+setTimeout(runScan, 1800);
+setInterval(runScan, 90000);
+
+// ───────────────── MODAL DATA ─────────────────
+const modalData = {
+  gamma: {
+    icon: '⚡',
+    title: 'GAMMA BLAST SCANNER',
+    color: '#FFD700',
+    rows: [
+      { k:'STRATEGY',   v:'Gamma Scalping (Expiry Day)',   cls:'' },
+      { k:'TRIGGER',    v:'γ > 0.002 + Price Breakout',    cls:'positive' },
+      { k:'ENTRY TIME', v:'Post 1:45 PM IST',              cls:'warning' },
+      { k:'DELTA RANGE',v:'0.30 – 0.50 (ATM/OTM)',        cls:'' },
+      { k:'PCR FILTER', v:'PCR < 0.70 (Bearish Confirm)',  cls:'negative' },
+      { k:'STOP LOSS',  v:'30% Premium Drop',              cls:'negative' },
+      { k:'TARGET',     v:'2×–3× Premium Blast',           cls:'positive' },
+      { k:'EXIT',       v:'Hard Exit by 3:15 PM',          cls:'warning' },
+      { k:'STATUS',     v:'SCANNING…',                     cls:'warning' },
+    ],
+    desc: 'Gamma Blast exploits high gamma near ATM options on expiry day. When gamma exceeds 0.002 and price breaks consolidation after 1:45 PM IST with a volume spike + IV jump, option premiums can explode 2–3× in minutes. Risk only 1–2% capital per trade.',
+    pills: ['Δ Delta', 'γ Gamma', 'θ Theta', 'ν Vega'],
+  },
+  vega: {
+    icon: '💜',
+    title: 'VEGA CRUSH SCANNER',
+    color: '#A855F7',
+    rows: [
+      { k:'STRATEGY',   v:'IV Crush / Vega Sell',         cls:'' },
+      { k:'TRIGGER',    v:'IV > 20% Pre-Event',           cls:'warning' },
+      { k:'ENTRY',      v:'Sell Options Before Event',    cls:'negative' },
+      { k:'VEGA',       v:'ATM Vega Highest (Short it)',  cls:'negative' },
+      { k:'IV CRUSH',   v:'Post-Event IV Collapse',       cls:'positive' },
+      { k:'BEST FOR',   v:'Budget / RBI / Results Day',   cls:'' },
+      { k:'RISK',       v:'IV Can Spike Further',         cls:'negative' },
+      { k:'STATUS',     v:'SCANNING…',                    cls:'warning' },
+    ],
+    desc: 'Vega Crush strategy profits from Implied Volatility (IV) collapsing after major events. ATM options have highest Vega — if IV rises by 2%, premium rises ₹20 per lot. Sell straddles/strangles before events and buy them back after IV crushes.',
+    pills: ['ν Vega', 'IV Crush', 'θ Theta', 'γ Gamma'],
+  },
+  pcr: {
+    icon: '📊',
+    title: 'PCR ANALYZER',
+    color: '#00BFFF',
+    rows: [
+      { k:'STRATEGY',   v:'Put-Call Ratio Signal',        cls:'' },
+      { k:'BULLISH',    v:'PCR > 1.0 (Buyers Protected)', cls:'positive' },
+      { k:'BEARISH',    v:'PCR < 0.7 (Sellers Active)',   cls:'negative' },
+      { k:'EXTREME BULL',v:'PCR > 1.6 → Rally Signal',   cls:'positive' },
+      { k:'EXTREME BEAR',v:'PCR < 0.6 → Correction',     cls:'negative' },
+      { k:'LIVE PCR',   v:'Fetching…',                   cls:'warning' },
+      { k:'FORMULA',    v:'Put OI ÷ Call OI',             cls:'' },
+      { k:'STATUS',     v:'SCANNING…',                    cls:'warning' },
+    ],
+    desc: 'PCR (Put-Call Ratio) divides total Put OI by Call OI. PCR > 1.6 = extreme fear → contrarian buy signal. PCR < 0.6 = complacency → correction possible. Track PCR changes every 15 min during expiry week for best accuracy.',
+    pills: ['Call OI', 'Put OI', 'PCR Live', 'Bias'],
+  },
+  oi: {
+    icon: '🏦',
+    title: 'OI WALL DETECTOR',
+    color: '#00FF88',
+    rows: [
+      { k:'STRATEGY',   v:'Open Interest Wall Analysis',  cls:'' },
+      { k:'MAX CALL OI',v:'= RESISTANCE WALL',            cls:'negative' },
+      { k:'MAX PUT OI', v:'= SUPPORT WALL',               cls:'positive' },
+      { k:'OI UNWIND',  v:'Call OI ↓ + Price ↑ = Rally', cls:'positive' },
+      { k:'SHORT CVR',  v:'Put OI ↓ + Price ↑ = Bullish',cls:'positive' },
+      { k:'FRESH BUILD',v:'OI ↑ = Strong Trend',          cls:'warning' },
+      { k:'REFRESH',    v:'Every 15–30 Minutes',          cls:'' },
+      { k:'STATUS',     v:'SCANNING…',                    cls:'warning' },
+    ],
+    desc: 'OI Wall Detector identifies max Call OI (resistance) and max Put OI (support) strikes. Expiry week: option writers defend these strikes aggressively. If Call OI decreases while price rises = Short Covering = very bullish signal.',
+    pills: ['Call OI', 'Put OI', 'ΔOI', 'Volume'],
+  },
+  maxpain: {
+    icon: '🎯',
+    title: 'MAX PAIN TRACKER',
+    color: '#FF3B3B',
+    rows: [
+      { k:'STRATEGY',   v:'Max Pain Gravitational Pull',  cls:'' },
+      { k:'DEFINITION', v:'Strike Where Buyers Lose Most',cls:'' },
+      { k:'FORMULA',    v:'Σ (Intrinsic Value × OI)',     cls:'' },
+      { k:'LIVE LEVEL', v:'Calculating…',                 cls:'warning' },
+      { k:'IF ABOVE MP',v:'Price Pulls DOWN to it',       cls:'negative' },
+      { k:'IF BELOW MP',v:'Price Pulls UP to it',         cls:'positive' },
+      { k:'ACCURACY',   v:'Best in Last 2 Hours',         cls:'warning' },
+      { k:'STATUS',     v:'SCANNING…',                    cls:'warning' },
+    ],
+    desc: 'Max Pain is the strike price at which maximum open options expire worthless — inflicting maximum loss on option BUYERS, maximum profit for WRITERS. Price gravitates toward max pain as expiry approaches, especially in last 90 minutes.',
+    pills: ['Max Pain', 'OI Dist', 'Gravity', 'Expiry'],
+  },
+  theta: {
+    icon: '⏳',
+    title: 'THETA DECAY SCANNER',
+    color: '#00BFFF',
+    rows: [
+      { k:'STRATEGY',   v:'Time Decay Exploitation',      cls:'' },
+      { k:'ATM DECAY',  v:'₹8–₹12 per Day (Weekly)',     cls:'negative' },
+      { k:'EXPIRY DAY', v:'40–60% Premium Lost Last 2h',  cls:'negative' },
+      { k:'SELL SIGNAL',v:'ATM Straddle Sell Pre-3PM',    cls:'positive' },
+      { k:'THETA',      v:'Negative for Buyers',          cls:'negative' },
+      { k:'THETA +',    v:'Positive for Sellers',         cls:'positive' },
+      { k:'RISK',       v:'Gamma Spike Can Hurt Sellers', cls:'warning' },
+      { k:'STATUS',     v:'SCANNING…',                    cls:'warning' },
+    ],
+    desc: 'Theta Decay scanner tracks premium erosion in ATM options. On expiry day a ₹50 ATM option at 9:30 AM can collapse to ₹15 by 2:30 PM even if index is FLAT — purely from Theta. Selling ATM options after 1 PM on expiry = theta capture strategy.',
+    pills: ['θ Theta', 'Premium', 'ATM Sell', 'Time'],
+  },
+  signals: {
+    icon: '🔮',
+    title: 'LIVE SIGNALS',
+    color: '#FFD700',
+    rows: [
+      { k:'ACTIVE SIGNALS', v:'Waiting for Scan…', cls:'warning' },
+      { k:'LAST SCAN',      v:'In Progress',        cls:'' },
+      { k:'BUY SIGNALS',    v:'0',                  cls:'positive' },
+      { k:'SELL SIGNALS',   v:'0',                  cls:'negative' },
+      { k:'WAIT SIGNALS',   v:'6',                  cls:'warning' },
+    ],
+    desc: 'Signals are generated when 2+ scanners confirm the same direction. Green = Buy Entry, Red = Sell/Short Entry. Always confirm with PCR and OI before entering. Max risk 1–2% per signal.',
+    pills: [],
+  },
+  watch: {
+    icon: '👁',
+    title: 'WATCHLIST',
+    color: '#00BFFF',
+    rows: [
+      { k:'NIFTY CE 24200', v:'Watch',   cls:'warning' },
+      { k:'NIFTY PE 24000', v:'Watch',   cls:'warning' },
+      { k:'BANKNIFTY CE',   v:'Watch',   cls:'warning' },
+      { k:'BANKNIFTY PE',   v:'Watch',   cls:'warning' },
+    ],
+    desc: 'Add Nifty / BankNifty ATM strikes to watchlist. Tap any scanner card then "Add to Watch".',
+    pills: [],
+  },
+  greeks: {
+    icon: '🔱',
+    title: 'LIVE GREEKS DASHBOARD',
+    color: '#A855F7',
+    rows: [
+      { k:'DELTA (Δ)', v:'Directional Sensitivity', cls:'' },
+      { k:'ATM CALL Δ', v:'≈ 0.50',                cls:'positive' },
+      { k:'ATM PUT Δ',  v:'≈ −0.50',               cls:'negative' },
+      { k:'GAMMA (γ)', v:'Delta Acceleration',       cls:'' },
+      { k:'ATM γ',     v:'Highest Near Expiry',      cls:'warning' },
+      { k:'THETA (θ)', v:'Time Decay / Day',         cls:'' },
+      { k:'ATM θ',     v:'−₹8 to −₹12',            cls:'negative' },
+      { k:'VEGA (ν)',  v:'IV Sensitivity',            cls:'' },
+      { k:'ATM ν',     v:'10 per 1% IV Move',        cls:'positive' },
+    ],
+    desc: 'Greeks quantify option price sensitivity. Monitor ALL four Greeks before expiry trade. High Gamma + Low Theta = ideal for buying. High Theta + Low Vega = ideal for selling.',
+    pills: ['Δ Delta', 'γ Gamma', 'θ Theta', 'ν Vega'],
+  },
+  admin: {
+    icon: '⚙️',
+    title: 'ADMIN SETTINGS',
+    color: '#888',
+    rows: [
+      { k:'API KEY',      v:'••••••••••',          cls:'' },
+      { k:'DATA SOURCE',  v:'NSE / Yahoo Finance', cls:'' },
+      { k:'SCAN INTERVAL',v:'90 Seconds',          cls:'positive' },
+      { k:'ALERTS',       v:'Enabled',             cls:'positive' },
+      { k:'VERSION',      v:'GANPATI v3.0',        cls:'warning' },
+      { k:'BUILT BY',     v:'GANPATI SYSTEMS',     cls:'' },
+    ],
+    desc: 'Configure API sources, scan intervals, and alert settings here. Ensure NSE data feed is active during market hours (9:15 AM – 3:30 PM IST).',
+    pills: [],
+  },
+};
+
+function openModal(key) {
+  const data = modalData[key];
+  if (!data) return;
+  const pillsHTML = data.pills.length
+    ? `<div class="greek-pills">${data.pills.map(p => {
+        const cls = p.startsWith('Δ')||p.includes('Delta') ? 'pill-delta'
+                  : p.startsWith('γ')||p.includes('Gamma') ? 'pill-gamma'
+                  : p.startsWith('θ')||p.includes('Theta') ? 'pill-theta'
+                  : 'pill-vega';
+        return `<span class="greek-pill ${cls}">${p}</span>`;
+      }).join('')}</div>` : '';
+
+  const rowsHTML = data.rows.map(r =>
+    `<div class="detail-row">
+       <span class="detail-key">${r.k}</span>
+       <span class="detail-val ${r.cls}">${r.v}</span>
+     </div>`).join('');
+
+  document.getElementById('modalSheet').innerHTML = `
+    <div class="modal-title" style="color:${data.color}">
+      ${data.icon} ${data.title}
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">✕</button>
+    </div>
+    ${pillsHTML}
+    ${rowsHTML}
+    <div class="modal-desc">${data.desc}</div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>

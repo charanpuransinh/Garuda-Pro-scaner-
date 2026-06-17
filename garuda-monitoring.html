@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>GARUDA POWER — Monitoring</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#f5c518;--g2:#c9a000;
+  --bg:#000;--b2:#0a0a0a;--b3:#111;--b4:#1a1a1a;
+  --br:#1e1a00;--brd:#FFD60022;--brd2:#FFD60044;
+  --tx:#fff;--tx1:#e5e5e5;--dm:#666;--dm2:#999;
+  --gn:#00e676;--rd:#ff1744;--or:#ff9100;
+  --cyan:#00fff7;--blue:#00b4ff;--purple:#a855f7;
+}
+html,body{background:var(--bg);color:var(--tx1);
+  font-family:'Share Tech Mono',monospace;font-size:13px;line-height:1.4;overflow-x:hidden;}
+.shell{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;
+  border-left:2px solid var(--gold);border-right:2px solid var(--gold);}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:2px solid var(--gold);background:var(--bg);}
+.hd-title{display:flex;align-items:center;gap:9px;font-family:'Orbitron',sans-serif;
+  font-weight:900;font-size:15px;letter-spacing:.08em;color:var(--gold);}
+.hd-right{display:flex;align-items:center;gap:8px;}
+.ai-pill{display:flex;align-items:center;gap:4px;font-size:8px;
+  border:1px solid rgba(0,255,247,.2);padding:3px 7px;}
+.ai-pill.claude{color:var(--cyan);}
+.ai-pill.gemini{color:var(--purple);}
+.ai-dot{width:5px;height:5px;border-radius:50%;animation:pulse 1.5s ease-in-out infinite;}
+.ai-dot.c{background:var(--cyan);box-shadow:0 0 4px var(--cyan);}
+.ai-dot.g{background:var(--purple);box-shadow:0 0 4px var(--purple);}
+@keyframes pulse{50%{opacity:.4;}}
+.theme-btn{background:transparent;border:1px solid var(--brd2);width:28px;height:28px;
+  cursor:pointer;display:grid;place-items:center;color:var(--gold);font-size:13px;}
+.stop-btn{width:28px;height:28px;border-radius:50%;background:var(--rd);
+  border:2px solid var(--rd);display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 0 10px rgba(255,23,68,.4);}
+.stop-btn::before{content:'';width:9px;height:9px;background:#fff;}
+
+/* PAGE BAR */
+.page-bar{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;background:var(--b2);border-bottom:1px solid var(--brd2);}
+.page-title{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;
+  color:var(--gold);letter-spacing:.1em;}
+.page-nav{background:var(--gold);color:#000;padding:5px 10px;
+  font-size:9px;font-weight:700;letter-spacing:.15em;cursor:pointer;border:none;}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);
+  background:var(--b2);border-bottom:1px solid var(--brd2);}
+.metric{padding:10px;border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);}
+.metric:nth-child(3n){border-right:0;}
+.metric:nth-child(n+4){border-bottom:0;}
+.m-label{font-size:8px;letter-spacing:.18em;color:var(--dm2);font-weight:600;margin-bottom:4px;}
+.m-value{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:800;
+  color:var(--gold);line-height:1;letter-spacing:-.02em;}
+.m-value small{font-size:9px;color:var(--dm2);font-weight:600;}
+.m-trend{font-size:9px;color:var(--dm2);margin-top:3px;font-weight:500;}
+.m-trend.up{color:var(--gn);}
+.m-trend.down{color:var(--rd);}
+
+/* SECTION HEAD */
+.sec-head{display:flex;align-items:center;gap:10px;padding:9px 14px;
+  background:var(--bg);border-top:2px solid var(--gold);border-bottom:1px solid var(--brd2);}
+.sec-mark{width:9px;height:9px;background:var(--gold);}
+.sec-num{font-size:9px;color:var(--dm2);letter-spacing:.15em;font-weight:600;}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  color:var(--tx);letter-spacing:.15em;flex:1;}
+.sec-meta{font-size:9px;color:#000;background:var(--gold);padding:2px 7px;font-weight:700;}
+
+/* HEALTH GRID */
+.health-grid{display:grid;grid-template-columns:repeat(2,1fr);
+  background:var(--bg);padding:8px;gap:8px;}
+.hcard{background:var(--b2);border:1px solid var(--brd2);padding:12px 10px;position:relative;transition:all .15s;}
+.hcard.ok{border-left:3px solid var(--gn);}
+.hcard.warn{border-left:3px solid var(--or);}
+.hcard.down{border-left:3px solid var(--rd);}
+.hcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.hcard-icon{font-size:20px;line-height:1;}
+.hcard-status-dot{width:7px;height:7px;border-radius:50%;}
+.hcard.ok .hcard-status-dot{background:var(--gn);box-shadow:0 0 5px var(--gn);}
+.hcard.warn .hcard-status-dot{background:var(--or);box-shadow:0 0 5px var(--or);}
+.hcard.down .hcard-status-dot{background:var(--rd);box-shadow:0 0 5px var(--rd);animation:pulse 1s ease-in-out infinite;}
+.hcard-tag{font-size:8px;letter-spacing:.15em;color:var(--gold);font-weight:700;margin-bottom:3px;}
+.hcard-name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  color:var(--tx);letter-spacing:.05em;margin-bottom:5px;}
+.hcard-value{font-size:9px;font-weight:600;letter-spacing:.05em;margin-bottom:5px;}
+.hcard.ok .hcard-value{color:var(--gn);}
+.hcard.warn .hcard-value{color:var(--or);}
+.hcard.down .hcard-value{color:var(--rd);}
+.hcard-stats{display:flex;gap:8px;align-items:center;font-size:9px;
+  padding-top:5px;border-top:1px solid var(--brd);}
+.hcard-stats .up{color:var(--gn);font-weight:700;}
+.hcard-stats .down{color:var(--rd);font-weight:700;}
+.live-tag{display:flex;align-items:center;gap:3px;margin-left:auto;
+  font-size:8px;color:var(--gn);letter-spacing:.1em;font-weight:700;}
+.live-tag::before{content:'';width:5px;height:5px;background:var(--gn);border-radius:50%;}
+
+/* PIPELINE */
+.pipeline{display:flex;align-items:center;justify-content:space-between;
+  padding:12px;background:var(--b2);border-bottom:1px solid var(--brd2);gap:4px;}
+.pipe-node{flex:1;background:var(--bg);border:1px solid var(--brd2);
+  padding:8px 4px;text-align:center;position:relative;}
+.pipe-node.active{border-color:var(--gold);background:var(--b3);}
+.pipe-arrow{color:var(--gold);font-size:14px;font-weight:700;flex-shrink:0;}
+.pipe-icon{width:24px;height:24px;margin:0 auto 4px;background:var(--gold);
+  color:#000;display:grid;place-items:center;font-weight:800;font-size:10px;
+  font-family:'Orbitron',sans-serif;}
+.pipe-label{font-size:7px;color:var(--dm2);letter-spacing:.1em;font-weight:600;margin-bottom:2px;}
+.pipe-value{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--gold);}
+.pipe-status{position:absolute;top:4px;right:4px;width:5px;height:5px;
+  border-radius:50%;background:var(--gn);}
+
+/* AI MONITOR SECTION */
+.ai-monitor{background:rgba(0,180,255,.03);border-bottom:1px solid rgba(0,180,255,.1);padding:10px 14px;}
+.ai-mon-hd{font-size:9px;color:var(--blue);font-weight:700;letter-spacing:1.5px;margin-bottom:8px;}
+.ai-mon-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.ai-mon-card{background:var(--b2);border:1px solid rgba(0,180,255,.15);padding:9px;}
+.ai-mon-nm{font-size:9px;color:var(--blue);font-weight:700;letter-spacing:1px;margin-bottom:4px;}
+.ai-mon-val{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:800;color:var(--gold);}
+.ai-mon-st{font-size:8px;color:var(--gn);margin-top:2px;}
+
+/* ACTIVE TRADES MONITOR */
+.trade-mon{padding:0 0 8px;}
+.tm-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;
+  padding:8px 14px;border-bottom:1px solid var(--brd);
+  align-items:center;font-size:10px;}
+.tm-sym{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--tx);}
+.tm-sub{font-size:8px;color:var(--dm2);margin-top:2px;}
+.tm-dir{font-size:9px;padding:1px 6px;font-weight:700;letter-spacing:1px;}
+.tm-dir.buy{background:rgba(0,230,118,.15);color:var(--gn);border:1px solid rgba(0,230,118,.3);}
+.tm-dir.sell{background:rgba(255,23,68,.1);color:var(--rd);border:1px solid rgba(255,23,68,.3);}
+.tm-pnl{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:800;text-align:right;}
+.tm-pnl.profit{color:var(--gn);}
+.tm-pnl.loss{color:var(--rd);}
+.tm-alert{display:flex;align-items:center;gap:5px;font-size:8px;
+  padding:4px 14px;background:rgba(255,145,0,.06);border-bottom:1px solid rgba(255,145,0,.1);}
+.tm-alert-ic{font-size:11px;}
+.tm-alert-tx{color:var(--or);}
+
+/* LOG */
+.log-wrap{background:var(--bg);}
+.log-strip{display:grid;grid-template-columns:55px 48px 1fr;
+  padding:8px 14px;gap:8px;border-bottom:1px solid var(--brd);
+  font-size:10px;align-items:center;}
+.log-strip:hover{background:var(--b2);}
+.log-time{color:var(--dm2);font-size:9px;font-weight:600;}
+.log-tag{display:inline-block;padding:2px 5px;font-size:8px;
+  letter-spacing:.15em;font-weight:700;text-align:center;}
+.log-tag.ok{color:#000;background:var(--gn);}
+.log-tag.err{color:#fff;background:var(--rd);}
+.log-tag.warn{color:#000;background:var(--or);}
+.log-msg{color:var(--tx1);font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.log-msg .key{color:var(--gold);font-weight:700;margin-right:4px;}
+
+/* STATUS FOOTER */
+.status-footer{display:grid;grid-template-columns:repeat(2,1fr);
+  background:var(--b2);border-top:2px solid var(--gold);}
+.sf-cell{padding:8px 12px;border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);}
+.sf-cell:nth-child(2n){border-right:0;}
+.sf-cell:nth-last-child(-n+2){border-bottom:0;}
+.sf-label{font-size:8px;letter-spacing:.18em;color:var(--dm2);font-weight:700;}
+.sf-value{font-size:11px;color:var(--gold);font-weight:700;margin-top:2px;}
+
+/* BOTTOM NAV */
+.bottom-nav{display:grid;grid-template-columns:repeat(6,1fr);
+  background:var(--b2);border-top:2px solid var(--gold);padding:7px 0 5px;}
+.nav-item{text-align:center;cursor:pointer;color:var(--dm2);}
+.nav-item.active,.nav-item:hover{color:var(--gold);}
+.nav-icon{font-size:18px;display:block;margin-bottom:2px;}
+.nav-label{font-size:7.5px;font-weight:700;letter-spacing:.1em;}
+</style>
+</head>
+<body>
+<main class="shell">
+
+  <header class="header">
+    <div class="hd-title">🔱 MONITORING</div>
+    <div class="hd-right">
+      <div class="ai-pill claude"><div class="ai-dot c"></div>CLAUDE</div>
+      <div class="ai-pill gemini"><div class="ai-dot g"></div>GEMINI</div>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☾</button>
+      <button class="stop-btn" onclick="panicStop()" title="PANIC EXIT"></button>
+    </div>
+  </header>
+
+  <div class="page-bar">
+    <div class="page-title">⚡ SYSTEM HEALTH — GARUDA POWER</div>
+    <button class="page-nav" onclick="window.location='https://trinetraa.garudanexus.com/garuda-master-panel.html'">CONTROL →</button>
+  </div>
+
+  <!-- METRICS -->
+  <section class="metrics">
+    <div class="metric">
+      <div class="m-label">UPTIME</div>
+      <div class="m-value" id="uptime">00:00:00</div>
+      <div class="m-trend">since boot</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">API CALLS</div>
+      <div class="m-value">2,847</div>
+      <div class="m-trend up">↑ 284/hr</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">LATENCY</div>
+      <div class="m-value">94<small>ms</small></div>
+      <div class="m-trend">avg p50</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">AUTO-FIX</div>
+      <div class="m-value">7</div>
+      <div class="m-trend">last 24h</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">ERRORS</div>
+      <div class="m-value">1</div>
+      <div class="m-trend down">last hour</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">PAIRS</div>
+      <div class="m-value">47<small>+</small></div>
+      <div class="m-trend up">↑ LIVE</div>
+    </div>
+  </section>
+
+  <!-- SEC 01: COMPONENT HEALTH -->
+  <div class="sec-head">
+    <div class="sec-mark"></div><div class="sec-num">SEC.01</div>
+    <div class="sec-title">Component Health</div>
+    <div class="sec-meta" id="lastCheck">SCAN 30s</div>
+  </div>
+  <section class="health-grid">
+    <div class="hcard ok">
+      <div class="hcard-top"><span class="hcard-icon">🌐</span><span class="hcard-status-dot"></span></div>
+      <div class="hcard-tag">🔱 BACKEND</div>
+      <div class="hcard-name">REST API</div>
+      <div class="hcard-value">ONLINE · 94ms</div>
+      <div class="hcard-stats"><span class="up">▲ 2847</span><span class="down">▼ 1</span><span class="live-tag">LIVE</span></div>
+    </div>
+    <div class="hcard ok">
+      <div class="hcard-top"><span class="hcard-icon">📡</span><span class="hcard-status-dot"></span></div>
+      <div class="hcard-tag">🔱 STREAM</div>
+      <div class="hcard-name">LIVE TICKS</div>
+      <div class="hcard-value">STREAMING · 47 PAIRS</div>
+      <div class="hcard-stats"><span class="up">▲ 18,420</span><span class="down">▼ 0</span><span class="live-tag">LIVE</span></div>
+    </div>
+    <div class="hcard ok">
+      <div class="hcard-top"><span class="hcard-icon">🏛️</span><span class="hcard-status-dot"></span></div>
+      <div class="hcard-tag">🔱 BROKER</div>
+      <div class="hcard-name">IBKR SESSION</div>
+      <div class="hcard-value">ACTIVE · 18.4h</div>
+      <div class="hcard-stats"><span class="up">▲ IBKR</span><span class="live-tag">LIVE</span></div>
+    </div>
+    <div class="hcard ok">
+      <div class="hcard-top"><span class="hcard-icon">💾</span><span class="hcard-status-dot"></span></div>
+      <div class="hcard-tag">🔱 STORAGE</div>
+      <div class="hcard-name">LOCAL DB</div>
+      <div class="hcard-value">412 KB · OK</div>
+      <div class="hcard-stats"><span class="up">▲ 22 keys</span><span class="live-tag">LIVE</span></div>
+    </div>
+    <div class="hcard ok">
+      <div class="hcard-top"><span class="hcard-icon">🤖</span><span class="hcard-status-dot"></span></div>
+      <div class="hcard-tag">🔱 AI ENGINE</div>
+      <div class="hcard-name">CLAUDE AI</div>
+      <div class="hcard-value">ACTIVE · SCANNING</div>
+      <div class="hcard-stats"><span class="up">▲ 47 pairs</span><span class="live-tag">LIVE</span></div>
+    </div>
+    <div class="hcard ok">
+      <div class="hcard-top"><span class="hcard-icon">✨</span><span class="hcard-status-dot"></span></div>
+      <div class="hcard-tag">🔱 AI ENGINE</div>
+      <div class="hcard-name">GEMINI AI</div>
+      <div class="hcard-value">ACTIVE · MONITORING</div>
+      <div class="hcard-stats"><span class="up">▲ SCAN</span><span class="live-tag">LIVE</span></div>
+    </div>
+  </section>
+
+  <!-- AI MONITOR -->
+  <div class="sec-head">
+    <div class="sec-mark"></div><div class="sec-num">SEC.02</div>
+    <div class="sec-title">AI Intelligence Monitor</div>
+    <div class="sec-meta">REAL-TIME</div>
+  </div>
+  <div class="ai-monitor">
+    <div class="ai-mon-hd">🤖 CLAUDE + GEMINI DUAL AI STATUS</div>
+    <div class="ai-mon-grid">
+      <div class="ai-mon-card">
+        <div class="ai-mon-nm">CLAUDE AI</div>
+        <div class="ai-mon-val" id="claudeSignals">12</div>
+        <div class="ai-mon-st">Active Signals</div>
+      </div>
+      <div class="ai-mon-card">
+        <div class="ai-mon-nm">GEMINI AI</div>
+        <div class="ai-mon-val" id="geminiSignals">9</div>
+        <div class="ai-mon-st">Confirmed Signals</div>
+      </div>
+      <div class="ai-mon-card">
+        <div class="ai-mon-nm">PAIRS SCANNED</div>
+        <div class="ai-mon-val">47</div>
+        <div class="ai-mon-st">Forex+Crypto+Comm</div>
+      </div>
+      <div class="ai-mon-card">
+        <div class="ai-mon-nm">LAST AI FIX</div>
+        <div class="ai-mon-val" id="lastFix">2m ago</div>
+        <div class="ai-mon-st">Auto-repaired</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="sec-head">
+    <div class="sec-mark"></div><div class="sec-num">SEC.03</div>
+    <div class="sec-title">Data Pipeline</div>
+    <div class="sec-meta">REAL-TIME</div>
+  </div>
+  <section class="pipeline">
+    <div class="pipe-node active">
+      <span class="pipe-status"></span>
+      <div class="pipe-icon">B</div>
+      <div class="pipe-label">Broker</div>
+      <div class="pipe-value">OK</div>
+    </div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-node active">
+      <span class="pipe-status"></span>
+      <div class="pipe-icon">AI</div>
+      <div class="pipe-label">AI Engine</div>
+      <div class="pipe-value">94ms</div>
+    </div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-node active">
+      <span class="pipe-status"></span>
+      <div class="pipe-icon">S</div>
+      <div class="pipe-label">Scanner</div>
+      <div class="pipe-value">9/9</div>
+    </div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-node active">
+      <span class="pipe-status"></span>
+      <div class="pipe-icon">U</div>
+      <div class="pipe-label">UI Live</div>
+      <div class="pipe-value">OK</div>
+    </div>
+  </section>
+
+  <!-- ACTIVE TRADES -->
+  <div class="sec-head">
+    <div class="sec-mark"></div><div class="sec-num">SEC.04</div>
+    <div class="sec-title">Active Trade Monitor</div>
+    <div class="sec-meta">3 OPEN</div>
+  </div>
+  <div class="trade-mon">
+    <div class="tm-row">
+      <div><div class="tm-sym">EUR/USD</div><div class="tm-sub">IBKR · 0.5 LOT · Entry: 1.0798</div></div>
+      <div class="tm-dir buy">BUY</div>
+      <div class="tm-pnl profit">+$124.50</div>
+    </div>
+    <div class="tm-row">
+      <div><div class="tm-sym">XAU/USD</div><div class="tm-sub">OANDA · 0.1 LOT · Entry: 2341.20</div></div>
+      <div class="tm-dir buy">BUY</div>
+      <div class="tm-pnl profit">+$476.80</div>
+    </div>
+    <div class="tm-alert">
+      <span class="tm-alert-ic">⚠️</span>
+      <span class="tm-alert-tx">GBP/USD SELL approaching SL — Claude AI: Monitor closely</span>
+    </div>
+    <div class="tm-row">
+      <div><div class="tm-sym">GBP/USD</div><div class="tm-sub">IC Markets · 0.3 LOT · Entry: 1.2754</div></div>
+      <div class="tm-dir sell">SELL</div>
+      <div class="tm-pnl loss">−$38.20</div>
+    </div>
+  </div>
+
+  <!-- SELF-REPAIR LOG -->
+  <div class="sec-head">
+    <div class="sec-mark"></div><div class="sec-num">SEC.05</div>
+    <div class="sec-title">Self-Repair Log</div>
+    <div class="sec-meta">7 EVENTS</div>
+  </div>
+  <section class="log-wrap">
+    <div class="log-strip"><span class="log-time" id="lt1"></span><span class="log-tag ok">OK</span><span class="log-msg"><span class="key">WS.RECONNECT</span>Tick gap 45s · Claude AI reconnected</span></div>
+    <div class="log-strip"><span class="log-time" id="lt2"></span><span class="log-tag ok">OK</span><span class="log-msg"><span class="key">TOKEN.REFRESH</span>IBKR token refreshed (8.1h old)</span></div>
+    <div class="log-strip"><span class="log-time" id="lt3"></span><span class="log-tag ok">OK</span><span class="log-msg"><span class="key">AI.GEMINI</span>Gemini rescanned 47 pairs · 9 signals</span></div>
+    <div class="log-strip"><span class="log-time" id="lt4"></span><span class="log-tag warn">WARN</span><span class="log-msg"><span class="key">TRADE.ALERT</span>GBP/USD near SL — watchdog active</span></div>
+    <div class="log-strip"><span class="log-time" id="lt5"></span><span class="log-tag ok">OK</span><span class="log-msg"><span class="key">STORAGE.CLEAN</span>Freed 6.2MB cache</span></div>
+    <div class="log-strip"><span class="log-time" id="lt6"></span><span class="log-tag ok">OK</span><span class="log-msg"><span class="key">PRICE.FEED</span>CRUDE OIL feed lag fixed · 23ms</span></div>
+    <div class="log-strip"><span class="log-time" id="lt7"></span><span class="log-tag err">FAIL</span><span class="log-msg"><span class="key">BROKER.TIMEOUT</span>Pepperstone API timeout x2 · retry OK</span></div>
+  </section>
+
+  <footer class="status-footer">
+    <div class="sf-cell"><div class="sf-label">SERVER</div><div class="sf-value">AWS AP-SOUTH</div></div>
+    <div class="sf-cell"><div class="sf-label">REGION</div><div class="sf-value">GLOBAL</div></div>
+    <div class="sf-cell"><div class="sf-label">WATCHDOG</div><div class="sf-value">ACTIVE · 30s</div></div>
+    <div class="sf-cell"><div class="sf-label">BUILD</div><div class="sf-value" id="buildVer">v2.0.0</div></div>
+  </footer>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location='https://trinetraa.garudanexus.com/garuda-power-a.html'"><span class="nav-label">HOME</span></div>
+    <div class="nav-item" onclick="window.location='https://trinetraa.garudanexus.com/garuda-power-b.html'"><span class="nav-label">SCAN</span></div>
+    <div class="nav-item" onclick="window.location='https://trinetraa.garudanexus.com/garuda-power-c.html'"><span class="nav-label">POWER</span></div>
+    <div class="nav-item" onclick="window.location='https://trinetraa.garudanexus.com/garuda-power-d.html'"><span class="nav-label">CHART</span></div>
+    <div class="nav-item" onclick="window.location='https://trinetraa.garudanexus.com/garuda-power-e.html'"><span class="nav-label">WATCH</span></div>
+    <div class="nav-item active" onclick="window.location='https://trinetraa.garudanexus.com/garuda-master-panel.html'"><span class="nav-label">ADMIN</span></div>
+  </nav>
+</main>
+
+<script>
+const startTs=Date.now();
+function updateUptime(){
+  const up=Math.floor((Date.now()-startTs)/1000);
+  const h=String(Math.floor(up/3600)).padStart(2,'0');
+  const m=String(Math.floor((up%3600)/60)).padStart(2,'0');
+  const s=String(up%60).padStart(2,'0');
+  document.getElementById('uptime').textContent=`${h}:${m}:${s}`;
+  document.getElementById('lastCheck').textContent='SCAN '+new Date().toLocaleTimeString('en',{hour12:false}).slice(0,8);
+}
+function setLogTimes(){
+  const now=new Date();
+  [['lt1',3],['lt2',8],['lt3',12],['lt4',18],['lt5',24],['lt6',31],['lt7',45]].forEach(([id,minsAgo])=>{
+    const t=new Date(now-minsAgo*60000);
+    document.getElementById(id).textContent=t.toLocaleTimeString('en',{hour12:false}).slice(0,8);
+  });
+}
+function toggleTheme(){
+  const b=document.body;const c=b.getAttribute('data-theme')==='light'?'dark':'light';
+  b.setAttribute('data-theme',c);document.getElementById('themeBtn').textContent=c==='dark'?'☾':'☀';
+}
+function goPage(p){
+  const m={home:'2_home_page.html',scanner:'5_scanner.html',power:'3_power_box.html',chart:'4_chart_page.html',watchlist:'6_watchlist.html',admin:'8_control_panel.html'};
+  if(m[p])window.location.href=m[p];
+}
+function panicStop(){if(confirm('🚨 PANIC EXIT?'))alert('ALL POSITIONS CLOSED!');}
+// Simulate AI updates
+setInterval(()=>{
+  document.getElementById('claudeSignals').textContent=10+Math.floor(Math.random()*6);
+  document.getElementById('geminiSignals').textContent=7+Math.floor(Math.random()*5);
+  document.getElementById('lastFix').textContent=Math.floor(Math.random()*5+1)+'m ago';
+},15000);
+setInterval(updateUptime,1000);
+updateUptime();setLogTimes();
+</script>
+</body>
+</html>

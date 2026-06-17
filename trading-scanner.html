@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EHASAS SCANNER — AI Trading Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold2: #FFA500;
+    --cyan: #00FFFF;
+    --green: #00FF88;
+    --red: #FF3366;
+    --purple: #9B59B6;
+    --bg: #030912;
+    --bg2: #060F1E;
+    --bg3: #091525;
+    --border: rgba(0,255,255,0.15);
+    --text: #C8D8E8;
+    --dim: rgba(200,216,232,0.5);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none; z-index:0;
+  }
+
+  /* Glow orbs */
+  body::after {
+    content:'';
+    position:fixed;
+    width:600px; height:600px;
+    background: radial-gradient(circle, rgba(0,100,255,0.08) 0%, transparent 70%);
+    top:-200px; left:-200px;
+    pointer-events:none; z-index:0;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+
+  @keyframes orbFloat {
+    0%,100%{transform:translate(0,0);}
+    50%{transform:translate(100px,80px);}
+  }
+
+  .container { position:relative; z-index:1; padding:16px; max-width:1800px; margin:0 auto; }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align:center;
+    padding: 24px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .header::after {
+    content:'';
+    position:absolute; bottom:-1px; left:50%; transform:translateX(-50%);
+    width:200px; height:2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+  .header-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px; font-weight:900;
+    letter-spacing: 8px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--cyan) 50%, var(--gold2) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    text-shadow: none;
+    animation: shimmer 3s infinite;
+  }
+  @keyframes shimmer {
+    0%{filter:brightness(1);}
+    50%{filter:brightness(1.3);}
+    100%{filter:brightness(1);}
+  }
+  .header-sub {
+    font-family:'Share Tech Mono';
+    font-size:11px; color:var(--dim);
+    letter-spacing:4px; margin-top:6px;
+  }
+  .header-pillars {
+    display:flex; justify-content:center; gap:30px;
+    margin-top:12px; flex-wrap:wrap;
+  }
+  .pillar-badge {
+    font-family:'Share Tech Mono'; font-size:10px;
+    padding:4px 12px; border-radius:2px;
+    border:1px solid; letter-spacing:2px;
+  }
+  .pb1{border-color:var(--gold);color:var(--gold); background:rgba(255,215,0,0.05);}
+  .pb2{border-color:var(--cyan);color:var(--cyan); background:rgba(0,255,255,0.05);}
+  .pb3{border-color:var(--purple);color:var(--purple); background:rgba(155,89,182,0.05);}
+  .pb4{border-color:var(--green);color:var(--green); background:rgba(0,255,136,0.05);}
+
+  /* ===== INPUT ZONE ===== */
+  .input-zone {
+    background: linear-gradient(135deg, rgba(0,255,255,0.04), rgba(255,215,0,0.04));
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:16px 20px;
+    margin-bottom:20px;
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  .input-label {
+    font-family:'Orbitron'; font-size:11px;
+    color:var(--gold); letter-spacing:3px;
+    white-space:nowrap;
+  }
+  .symbol-input {
+    flex:1; min-width:200px;
+    background: rgba(0,0,0,0.6);
+    border:1px solid var(--cyan);
+    color:var(--cyan);
+    font-family:'Orbitron'; font-size:18px; font-weight:700;
+    padding:10px 16px; border-radius:3px;
+    outline:none; letter-spacing:4px;
+    text-transform:uppercase;
+    box-shadow: 0 0 20px rgba(0,255,255,0.1) inset;
+    transition: all 0.3s;
+  }
+  .symbol-input:focus {
+    border-color:var(--gold);
+    box-shadow: 0 0 30px rgba(255,215,0,0.15) inset, 0 0 30px rgba(255,215,0,0.1);
+  }
+  .symbol-input::placeholder { color:rgba(0,255,255,0.3); font-size:12px; letter-spacing:2px; }
+
+  .type-select {
+    background: rgba(0,0,0,0.6);
+    border:1px solid rgba(255,215,0,0.4);
+    color:var(--gold);
+    font-family:'Share Tech Mono'; font-size:12px;
+    padding:10px 12px; border-radius:3px;
+    outline:none; cursor:pointer;
+  }
+  .type-select option { background:#060F1E; }
+
+  .scan-btn {
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,255,255,0.1));
+    border:1px solid var(--gold);
+    color:var(--gold);
+    font-family:'Orbitron'; font-size:11px; font-weight:700;
+    padding:10px 24px; border-radius:3px;
+    cursor:pointer; letter-spacing:3px;
+    transition: all 0.3s;
+    white-space:nowrap;
+    position:relative; overflow:hidden;
+  }
+  .scan-btn::before {
+    content:'';
+    position:absolute; top:0; left:-100%;
+    width:100%; height:100%;
+    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.2), transparent);
+    transition: left 0.5s;
+  }
+  .scan-btn:hover::before { left:100%; }
+  .scan-btn:hover {
+    background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(0,255,255,0.15));
+    box-shadow: 0 0 30px rgba(255,215,0,0.3);
+  }
+  .scan-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+  /* ===== MAIN GRID ===== */
+  .main-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:12px;
+    margin-bottom:16px;
+  }
+
+  /* ===== PILLAR COLUMN ===== */
+  .pillar-col {
+    border-radius:4px;
+    overflow:hidden;
+    border:1px solid;
+    position:relative;
+  }
+  .pillar-col.p1 { border-color:rgba(255,215,0,0.2); }
+  .pillar-col.p2 { border-color:rgba(0,255,255,0.2); }
+  .pillar-col.p3 { border-color:rgba(155,89,182,0.2); }
+
+  .pillar-header {
+    padding:12px 14px;
+    display:flex; align-items:center; gap:10px;
+    border-bottom:1px solid;
+  }
+  .p1 .pillar-header { background:rgba(255,215,0,0.06); border-color:rgba(255,215,0,0.15); }
+  .p2 .pillar-header { background:rgba(0,255,255,0.06); border-color:rgba(0,255,255,0.15); }
+  .p3 .pillar-header { background:rgba(155,89,182,0.06); border-color:rgba(155,89,182,0.15); }
+
+  .pillar-icon { font-size:20px; }
+  .pillar-title-block {}
+  .pillar-num {
+    font-family:'Share Tech Mono'; font-size:9px;
+    letter-spacing:3px; opacity:0.6;
+  }
+  .p1 .pillar-num { color:var(--gold); }
+  .p2 .pillar-num { color:var(--cyan); }
+  .p3 .pillar-num { color:var(--purple); }
+  .pillar-name {
+    font-family:'Orbitron'; font-size:12px; font-weight:700;
+    letter-spacing:2px;
+  }
+  .p1 .pillar-name { color:var(--gold); }
+  .p2 .pillar-name { color:var(--cyan); }
+  .p3 .pillar-name { color:var(--purple); }
+
+  /* ===== ROWS ===== */
+  .row-item {
+    display:grid;
+    grid-template-columns: 180px 1fr;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+    min-height:52px;
+  }
+  .row-item:last-child { border-bottom:none; }
+
+  .row-name {
+    padding:8px 12px;
+    border-right:1px solid rgba(255,255,255,0.06);
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .legend-name {
+    font-family:'Rajdhani'; font-size:13px; font-weight:700;
+    line-height:1.2;
+  }
+  .p1 .legend-name { color:var(--gold); }
+  .p2 .legend-name { color:var(--cyan); }
+  .p3 .legend-name { color:var(--purple); }
+
+  .legend-formula {
+    font-family:'Share Tech Mono'; font-size:9px;
+    color:rgba(255,255,255,0.3); margin-top:2px;
+    line-height:1.3;
+  }
+
+  .row-result {
+    padding:8px 12px;
+    display:flex; align-items:center;
+    font-family:'Share Tech Mono'; font-size:11px;
+    color:rgba(255,255,255,0.15);
+    position:relative; overflow:hidden;
+  }
+  .row-result.loading {
+    color:var(--gold);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+
+  .result-content {
+    width:100%;
+  }
+  .result-signal {
+    display:inline-block;
+    font-family:'Share Tech Mono'; font-size:10px;
+    padding:2px 8px; border-radius:2px;
+    margin-bottom:3px; font-weight:700;
+  }
+  .sig-bull { background:rgba(0,255,136,0.15); color:var(--green); border:1px solid rgba(0,255,136,0.3); }
+  .sig-bear { background:rgba(255,51,102,0.15); color:var(--red); border:1px solid rgba(255,51,102,0.3); }
+  .sig-neut { background:rgba(255,165,0,0.15); color:var(--gold2); border:1px solid rgba(255,165,0,0.3); }
+
+  .result-text {
+    font-size:10px; color:var(--text);
+    line-height:1.4; font-family:'Rajdhani';
+  }
+
+  .placeholder-text {
+    color:rgba(255,255,255,0.12);
+    font-family:'Share Tech Mono'; font-size:10px;
+    letter-spacing:1px;
+  }
+
+  /* ===== VERDICT ZONE ===== */
+  .verdict-zone {
+    background: linear-gradient(135deg, rgba(0,20,40,0.9), rgba(0,10,25,0.95));
+    border:1px solid rgba(0,255,136,0.2);
+    border-radius:4px;
+    padding:20px;
+    position:relative; overflow:hidden;
+    margin-bottom:16px;
+  }
+  .verdict-zone::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0;
+    height:2px;
+    background: linear-gradient(90deg, var(--green), var(--cyan), var(--gold));
+  }
+  .verdict-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px; flex-wrap:wrap; gap:12px;
+  }
+  .verdict-title {
+    font-family:'Orbitron'; font-size:14px; font-weight:900;
+    color:var(--green); letter-spacing:4px;
+  }
+  .verdict-status {
+    font-family:'Share Tech Mono'; font-size:11px;
+    color:rgba(0,255,136,0.5); letter-spacing:2px;
+  }
+
+  .verdict-body {
+    display:grid;
+    grid-template-columns: 1fr 1fr 200px;
+    gap:16px; align-items:start;
+  }
+
+  .verdict-text-block {
+    background: rgba(0,0,0,0.3);
+    border:1px solid rgba(0,255,136,0.1);
+    border-radius:3px; padding:14px;
+    min-height:80px;
+    font-family:'Rajdhani'; font-size:13px; line-height:1.6;
+    color:var(--text);
+  }
+  .verdict-text-block.empty {
+    color:rgba(255,255,255,0.15);
+    font-family:'Share Tech Mono'; font-size:10px;
+    display:flex; align-items:center; justify-content:center;
+    letter-spacing:2px;
+  }
+
+  /* Score gauge */
+  .score-gauge {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .gauge-ring {
+    width:120px; height:120px;
+    position:relative;
+  }
+  .gauge-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+  .gauge-bg { fill:none; stroke:rgba(255,255,255,0.06); stroke-width:8; }
+  .gauge-fill {
+    fill:none; stroke-width:8;
+    stroke-linecap:round;
+    stroke-dasharray:283;
+    stroke-dashoffset:283;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1), stroke 0.5s;
+  }
+  .gauge-center {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  .gauge-pct {
+    font-family:'Orbitron'; font-size:22px; font-weight:900;
+    line-height:1; transition:color 0.5s;
+  }
+  .gauge-label {
+    font-family:'Share Tech Mono'; font-size:8px;
+    color:var(--dim); letter-spacing:2px;
+    margin-top:2px;
+  }
+  .score-sublabels {
+    width:100%; display:flex; justify-content:space-between;
+    font-family:'Share Tech Mono'; font-size:9px;
+  }
+  .success-pct { color:var(--green); }
+  .fail-pct { color:var(--red); }
+
+  .verdict-decision {
+    background: rgba(0,0,0,0.4);
+    border:1px solid; border-radius:3px;
+    padding:14px; text-align:center;
+    display:flex; flex-direction:column;
+    justify-content:center; gap:8px;
+    min-height:80px;
+  }
+  .decision-label {
+    font-family:'Share Tech Mono'; font-size:9px;
+    letter-spacing:3px; opacity:0.6;
+  }
+  .decision-word {
+    font-family:'Orbitron'; font-size:18px; font-weight:900;
+    letter-spacing:4px;
+  }
+  .decision-conf {
+    font-family:'Rajdhani'; font-size:11px; opacity:0.7;
+  }
+
+  /* Decision States */
+  .dec-buy { border-color:rgba(0,255,136,0.4); }
+  .dec-buy .decision-word { color:var(--green); text-shadow:0 0 20px rgba(0,255,136,0.5); }
+  .dec-sell { border-color:rgba(255,51,102,0.4); }
+  .dec-sell .decision-word { color:var(--red); text-shadow:0 0 20px rgba(255,51,102,0.5); }
+  .dec-wait { border-color:rgba(255,165,0,0.4); }
+  .dec-wait .decision-word { color:var(--gold2); text-shadow:0 0 20px rgba(255,165,0,0.4); }
+  .dec-empty { border-color:rgba(255,255,255,0.08); }
+  .dec-empty .decision-word { color:rgba(255,255,255,0.2); font-size:12px; }
+
+  /* Progress bars for sub-scores */
+  .score-bars {
+    grid-column: 1/-1;
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+  }
+  .score-bar-item { }
+  .sbar-header {
+    display:flex; justify-content:space-between;
+    font-family:'Share Tech Mono'; font-size:9px;
+    margin-bottom:4px;
+  }
+  .sbar-name { color:var(--dim); letter-spacing:1px; }
+  .sbar-val { font-weight:700; }
+  .sbar-track {
+    height:4px; background:rgba(255,255,255,0.06);
+    border-radius:2px; overflow:hidden;
+  }
+  .sbar-fill {
+    height:100%; border-radius:2px;
+    width:0%; transition: width 1.5s ease;
+  }
+
+  /* ===== STATUS BAR ===== */
+  .status-bar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px;
+    background:rgba(0,0,0,0.4);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:3px;
+    font-family:'Share Tech Mono'; font-size:10px;
+    flex-wrap:wrap; gap:8px;
+  }
+  .status-dot {
+    display:inline-block; width:6px; height:6px;
+    border-radius:50%; margin-right:6px;
+    animation:blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+  .dot-idle { background:var(--dim); animation:none; }
+  .dot-live { background:var(--green); }
+  .dot-proc { background:var(--gold); }
+
+  .status-items { display:flex; gap:20px; flex-wrap:wrap; }
+  .status-item { color:var(--dim); }
+  .status-item span { color:var(--text); }
+
+  /* Scanline animation on result cells */
+  @keyframes scanline {
+    0%{ transform:translateY(-100%); }
+    100%{ transform:translateY(200%); }
+  }
+  .scanning .row-result::after {
+    content:'';
+    position:absolute; left:0; right:0;
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation: scanline 1s linear infinite;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:1100px) {
+    .main-grid { grid-template-columns:1fr; }
+    .verdict-body { grid-template-columns:1fr 1fr; }
+    .score-bars { grid-column:1/-1; grid-template-columns:1fr; }
+  }
+  @media(max-width:600px) {
+    .header-title { font-size:18px; letter-spacing:4px; }
+    .verdict-body { grid-template-columns:1fr; }
+    .score-gauge { flex-direction:row; }
+  }
+
+  /* Loading spinner */
+  .spin { animation: spin 1s linear infinite; display:inline-block; }
+  @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+  .row-item:nth-child(odd) .row-name { background:rgba(255,255,255,0.01); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-title">⚡ EHASAS SCANNER</div>
+    <div class="header-sub">MULTI-PILLAR AI TRADING INTELLIGENCE SYSTEM v3.0</div>
+    <div class="header-pillars">
+      <span class="pillar-badge pb1">▲ PILLAR 1 · MASTERS</span>
+      <span class="pillar-badge pb2">◆ PILLAR 2 · CLAUDE AI</span>
+      <span class="pillar-badge pb3">● PILLAR 3 · GEMINI</span>
+      <span class="pillar-badge pb4">★ FINAL JUDGE · CLAUDE</span>
+    </div>
+  </div>
+
+  <!-- INPUT ZONE -->
+  <div class="input-zone">
+    <div class="input-label">TARGET SYMBOL</div>
+    <input type="text" class="symbol-input" id="symbolInput"
+           placeholder="ENTER STOCK / INDEX NAME..." maxlength="20">
+    <select class="type-select" id="typeSelect">
+      <option value="NIFTY">NIFTY INDEX</option>
+      <option value="STOCK">STOCK</option>
+      <option value="BANKNIFTY">BANK NIFTY</option>
+      <option value="SENSEX">SENSEX</option>
+      <option value="CRYPTO">CRYPTO</option>
+    </select>
+    <button class="scan-btn" id="scanBtn" onclick="runScan()">
+      ⚡ SCAN NOW
+    </button>
+  </div>
+
+  <!-- MAIN 3-PILLAR GRID -->
+  <div class="main-grid" id="mainGrid">
+
+    <!-- PILLAR 1: MASTERS (Volume & Price Legends) -->
+    <div class="pillar-col p1" id="pillar1">
+      <div class="pillar-header">
+        <div class="pillar-icon">📚</div>
+        <div class="pillar-title-block">
+          <div class="pillar-num">PILLAR 01 · STRUCTURAL ANALYSIS</div>
+          <div class="pillar-name">MASTERS OF PRICE & VOLUME</div>
+        </div>
+      </div>
+
+      <!-- 10 Volume/Price Legends -->
+      <div id="p1rows">
+        <!-- Row data injected by JS -->
+      </div>
+    </div>
+
+    <!-- PILLAR 2: CLAUDE (Numerical Research) -->
+    <div class="pillar-col p2" id="pillar2">
+      <div class="pillar-header">
+        <div class="pillar-icon">🔢</div>
+        <div class="pillar-title-block">
+          <div class="pillar-num">PILLAR 02 · NUMERICAL RESEARCH</div>
+          <div class="pillar-name">CLAUDE AI QUANTITATIVE</div>
+        </div>
+      </div>
+      <div id="p2rows"></div>
+    </div>
+
+    <!-- PILLAR 3: GEMINI (Sentiment) -->
+    <div class="pillar-col p3" id="pillar3">
+      <div class="pillar-header">
+        <div class="pillar-icon">🌐</div>
+        <div class="pillar-title-block">
+          <div class="pillar-num">PILLAR 03 · SENTIMENT ANALYSIS</div>
+          <div class="pillar-name">GEMINI AI INTELLIGENCE</div>
+        </div>
+      </div>
+      <div id="p3rows"></div>
+    </div>
+
+  </div>
+
+  <!-- FINAL VERDICT ZONE -->
+  <div class="verdict-zone" id="verdictZone">
+    <div class="verdict-header">
+      <div class="verdict-title">★ CLAUDE FINAL VERDICT</div>
+      <div class="verdict-status" id="verdictStatus">◎ AWAITING SCAN INPUT</div>
+    </div>
+    <div class="verdict-body">
+      <div class="verdict-text-block empty" id="verdictAnalysis">
+        ENTER SYMBOL AND CLICK SCAN TO BEGIN ANALYSIS
+      </div>
+      <div class="score-gauge">
+        <div class="gauge-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="45"/>
+            <circle class="gauge-fill" id="gaugeFill" cx="50" cy="50" r="45"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-pct" id="gaugePct" style="color:rgba(255,255,255,0.2)">--</div>
+            <div class="gauge-label">ACCURACY</div>
+          </div>
+        </div>
+        <div class="score-sublabels">
+          <div class="success-pct">✓ SUCCESS: <span id="successPct">--%</span></div>
+          <div class="fail-pct">✗ FAIL: <span id="failPct">--%</span></div>
+        </div>
+      </div>
+      <div class="verdict-decision dec-empty" id="verdictDecision">
+        <div class="decision-label">CLAUDE COMMAND</div>
+        <div class="decision-word">STANDBY</div>
+        <div class="decision-conf" id="decisionConf">—</div>
+      </div>
+      <div class="score-bars">
+        <div class="score-bar-item">
+          <div class="sbar-header">
+            <div class="sbar-name">▲ PILLAR 1 · MASTERS SCORE</div>
+            <div class="sbar-val" id="p1score" style="color:var(--gold)">0%</div>
+          </div>
+          <div class="sbar-track"><div class="sbar-fill" id="p1bar" style="background:var(--gold)"></div></div>
+        </div>
+        <div class="score-bar-item">
+          <div class="sbar-header">
+            <div class="sbar-name">◆ PILLAR 2 · CLAUDE SCORE</div>
+            <div class="sbar-val" id="p2score" style="color:var(--cyan)">0%</div>
+          </div>
+          <div class="sbar-track"><div class="sbar-fill" id="p2bar" style="background:var(--cyan)"></div></div>
+        </div>
+        <div class="score-bar-item">
+          <div class="sbar-header">
+            <div class="sbar-name">● PILLAR 3 · GEMINI SCORE</div>
+            <div class="sbar-val" id="p3score" style="color:var(--purple)">0%</div>
+          </div>
+          <div class="sbar-track"><div class="sbar-fill" id="p3bar" style="background:var(--purple)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div>
+      <span class="status-dot dot-idle" id="statusDot"></span>
+      <span id="statusMsg" style="color:var(--dim)">SYSTEM IDLE — ENTER SYMBOL TO SCAN</span>
+    </div>
+    <div class="status-items">
+      <div class="status-item">MODEL: <span>claude-sonnet-4-20250514</span></div>
+      <div class="status-item">ENGINE: <span>EHASAS v3.0</span></div>
+      <div class="status-item">PILLARS: <span>3 ACTIVE</span></div>
+      <div class="status-item" id="timeItem">TIME: <span id="clockSpan">--:--:--</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA: Legend Definitions
+// ============================================================
+const PILLAR1_LEGENDS = [
+  {
+    name: "Richard Wyckoff",
+    formula: "Accumulation/Distribution · Composite Man · Spring & Upthrust",
+    prompt: "You are Richard Wyckoff analyzing {SYMBOL}. Apply Wyckoff Method: identify Accumulation or Distribution phase, Composite Man behavior, Springs/Upthrusts, Phase A-E analysis. Give concrete bullish/bearish signal with reasoning in 2-3 sentences."
+  },
+  {
+    name: "Jesse Livermore",
+    formula: "Pivotal Points · Tape Reading · Key Number System",
+    prompt: "You are Jesse Livermore analyzing {SYMBOL}. Apply Livermore's Pivotal Point method, tape reading principles, key price levels, and trend following rules. Give a clear trading signal with reasoning in 2-3 sentences."
+  },
+  {
+    name: "Larry Williams",
+    formula: "%R Oscillator · COT Data · Seasonal Patterns · Market Thrust",
+    prompt: "You are Larry Williams analyzing {SYMBOL}. Apply Williams %R, COT data interpretation, seasonal patterns, and Market Thrust indicator. Give bullish/bearish/neutral signal with reasoning in 2-3 sentences."
+  },
+  {
+    name: "William O'Neil",
+    formula: "CAN SLIM · Cup with Handle · Relative Strength · Volume Surge",
+    prompt: "You are William O'Neil analyzing {SYMBOL}. Apply CAN SLIM methodology, look for Cup-with-Handle pattern, check Relative Strength, institutional sponsorship. Give buy/sell/watch signal with reasoning in 2-3 sentences."
+  },
+  {
+    name: "Mark Minervini",
+    formula: "SEPA Strategy · VCP · Stage Analysis · Tight Consolidation",
+    prompt: "You are Mark Minervini analyzing {SYMBOL}. Apply SEPA strategy and Volatility Contraction Pattern (VCP). Check for Stage 2 uptrend, tight price action. Give precise entry/exit signal with reasoning in 2-3 sentences."
+  },
+  {
+    name: "Tom DeMark",
+    formula: "TD Sequential · TD Setup · TD Countdown · DeMark Indicators",
+    prompt: "You are Tom DeMark analyzing {SYMBOL}. Apply TD Sequential count, identify TD Setup completion (9-count), TD Countdown. Assess exhaustion signals. Give reversal or continuation signal with reasoning in 2-3 sentences."
+  },
+  {
+    name: "Jack Schwager",
+    formula: "Market Wizards Synthesis · Multiple Timeframe · Risk-Reward",
+    prompt: "You are Jack Schwager synthesizing Market Wizards wisdom for {SYMBOL}. Evaluate risk-reward ratio, multiple timeframe alignment, mental stops, and position sizing. Give trade recommendation with reasoning in 2-3 sentences."
+  },
+  {
+    name: "Stan Weinstein",
+    formula: "Stage Analysis · 30-Week MA · Relative Performance · Volume",
+    prompt: "You are Stan Weinstein analyzing {SYMBOL}. Apply Stage Analysis (1-4), check 30-week moving average position, relative performance vs market, volume expansion. Identify current Stage and signal in 2-3 sentences."
+  },
+  {
+    name: "Nicolas Darvas",
+    formula: "Darvas Box · New Highs · Volume Explosion · Momentum",
+    prompt: "You are Nicolas Darvas analyzing {SYMBOL}. Look for Darvas Box formation, stocks making new highs on volume explosion. Apply box breakout principles. Give buy/hold/sell signal with reasoning in 2-3 sentences."
+  },
+  {
+    name: "George Soros",
+    formula: "Reflexivity Theory · Macro Trends · Boom-Bust · Paradigm Shift",
+    prompt: "You are George Soros analyzing {SYMBOL} through Reflexivity Theory. Identify boom-bust cycle position, macro trend alignment, cognitive biases in market, paradigm shift potential. Give macro directional signal with reasoning in 2-3 sentences."
+  }
+];
+
+const PILLAR2_INDICATORS = [
+  {
+    name: "PCR Analysis",
+    formula: "Put-Call Ratio · OI-based PCR · PCR Extremes · Contrarian Signal",
+    prompt: "Analyze Put-Call Ratio (PCR) for {SYMBOL}. A PCR above 1.3 is extremely bullish (contrarian), below 0.7 is bearish. Discuss typical PCR range, what it suggests about option writers' positioning, and give clear bullish/bearish signal based on PCR theory in 2-3 sentences."
+  },
+  {
+    name: "Open Interest (OI)",
+    formula: "Max Pain · OI Buildup · CE/PE OI · Unwinding Signals",
+    prompt: "Analyze Open Interest dynamics for {SYMBOL}. Discuss Max Pain theory, Call OI vs Put OI buildup at key strikes, OI unwinding signals, what smart money option writers are positioning for. Give directional signal in 2-3 sentences."
+  },
+  {
+    name: "FII/DII Activity",
+    formula: "FII Net Buying/Selling · DII Counter-Flow · Institutional Trend",
+    prompt: "Analyze FII (Foreign Institutional Investor) and DII (Domestic Institutional Investor) data for {SYMBOL} or Indian market. Discuss typical FII buying/selling patterns, DII counterbalance, what institutional flow suggests for trend direction. Give signal in 2-3 sentences."
+  },
+  {
+    name: "Option Chain",
+    formula: "Highest OI Strikes · Support/Resistance · IV Analysis",
+    prompt: "Analyze the Option Chain for {SYMBOL}. Identify highest Call OI and Put OI strikes as resistance and support, assess Implied Volatility levels, identify option chain structure (bullish/bearish/neutral). Give key levels and directional signal in 2-3 sentences."
+  },
+  {
+    name: "IV & VIX",
+    formula: "India VIX · IV Crush · IV Rank · Volatility Regime",
+    prompt: "Analyze India VIX and Implied Volatility for {SYMBOL}. Discuss VIX level interpretation (below 15 = low fear, above 20 = high fear), IV Rank, volatility regime for option strategy selection. Give signal in 2-3 sentences."
+  },
+  {
+    name: "Delivery Data",
+    formula: "Delivery % · Delivery Volume · Institutional Holding Signal",
+    prompt: "Analyze delivery percentage data for {SYMBOL}. High delivery % (>60%) indicates genuine buying vs speculative. Discuss what delivery volume trends suggest about institutional accumulation or distribution. Give signal in 2-3 sentences."
+  },
+  {
+    name: "Circuit & F&O Ban",
+    formula: "F&O Ban List · Short Build-up · Long Unwinding · Circuit Levels",
+    prompt: "Analyze F&O Ban status and circuit filter data for {SYMBOL}. Discuss impact of stock being in or near F&O ban, short buildup vs long unwinding signals from price+OI combination. Give risk-adjusted signal in 2-3 sentences."
+  },
+  {
+    name: "CoT / Smart Money",
+    formula: "Proprietary Desk · Client Positioning · Smart Money Index",
+    prompt: "Analyze Smart Money positioning for {SYMBOL}. Discuss proprietary trading desk vs client positioning divergence, smart money index readings, institutional vs retail positioning. Give contrarian or trend-confirmation signal in 2-3 sentences."
+  },
+  {
+    name: "Support & Resistance",
+    formula: "Pivot Points · Historical OI Zones · Options-derived S/R",
+    prompt: "Calculate key Support and Resistance levels for {SYMBOL} using pivot points, historical price clusters, and options-derived levels (highest OI strikes). Identify 3 key support and 3 key resistance levels. Give signal based on current position. 2-3 sentences."
+  },
+  {
+    name: "Greeks Analysis",
+    formula: "Delta · Gamma · Theta Decay · Vega Exposure",
+    prompt: "Analyze Options Greeks for {SYMBOL}. Discuss Delta (directional exposure), Gamma risk near expiry, Theta decay impact on premium buyers vs sellers, Vega sensitivity. What do Greeks suggest about directional probability? Give signal in 2-3 sentences."
+  }
+];
+
+const PILLAR3_GEMINI = [
+  {
+    name: "Google Trends",
+    formula: "Search Interest · Trend Spike · Geographic Sentiment",
+    prompt: "As Gemini AI with Google Trends access, analyze search interest for {SYMBOL}. Discuss typical retail search patterns, interest spikes vs market tops, geographic concentration. What does search trend data suggest? Give sentiment signal in 2-3 sentences."
+  },
+  {
+    name: "News Sentiment",
+    formula: "Headlines NLP · Positive/Negative Ratio · Event Impact",
+    prompt: "As Gemini AI analyzing Google News for {SYMBOL}, perform sentiment analysis. Assess recent news headline tone (positive/negative/neutral ratio), major catalysts, event-driven risks or opportunities. Give news sentiment signal in 2-3 sentences."
+  },
+  {
+    name: "Social Sentiment",
+    formula: "Twitter/X Buzz · Reddit Mentions · StockTwits Heat",
+    prompt: "As Gemini AI, analyze social media sentiment for {SYMBOL}. Assess Twitter/X chatter volume, Reddit discussion tone, retail investor sentiment heat. Contrarian or momentum signal from social data? Give signal in 2-3 sentences."
+  },
+  {
+    name: "Macro Sentiment",
+    formula: "RBI Policy · Budget Triggers · Global Fed Impact",
+    prompt: "As Gemini AI, analyze macro sentiment affecting {SYMBOL}. Discuss RBI monetary policy stance, Union Budget impact, US Federal Reserve decisions, global risk-on/risk-off sentiment. How does macro environment affect this trade? 2-3 sentences."
+  },
+  {
+    name: "Sector Rotation",
+    formula: "Hot Sector · FII Sector Preference · Sector Momentum",
+    prompt: "As Gemini AI, analyze sector rotation dynamics for {SYMBOL}'s sector. Which sectors are in favor (FII buying, price leadership), which are lagging. Is this symbol in a hot sector or cold sector currently? Give sector tailwind/headwind signal in 2-3 sentences."
+  },
+  {
+    name: "Global Cues",
+    formula: "SGX Nifty · Dow Futures · Asia Markets · DXY",
+    prompt: "As Gemini AI, analyze global market cues relevant to {SYMBOL}. Assess SGX Nifty signals, US market direction (Dow/S&P), Asian markets (Nikkei, Hang Seng), Dollar Index (DXY strength). How do global cues support or oppose this trade? 2-3 sentences."
+  },
+  {
+    name: "AI Trend Radar",
+    formula: "Emerging Themes · AI/Tech Disruption · Thematic Flows",
+    prompt: "As Gemini AI, identify thematic and emerging trends for {SYMBOL}. Is this stock/index benefiting from AI, green energy, defense, infrastructure or other mega-themes? Assess thematic tailwind strength. Give signal in 2-3 sentences."
+  },
+  {
+    name: "Earnings Whisper",
+    formula: "Earnings Estimate · EPS Growth · Guidance Revision",
+    prompt: "As Gemini AI, analyze earnings sentiment for {SYMBOL}. Discuss upcoming earnings expectations, analyst EPS estimate revision trend, management guidance history. Are earnings likely to be a positive or negative catalyst? Give signal in 2-3 sentences."
+  },
+  {
+    name: "Promoter Activity",
+    formula: "Promoter Holding % · Pledge · Insider Buying",
+    prompt: "As Gemini AI, analyze promoter and insider activity for {SYMBOL}. Discuss promoter holding percentage trend, pledge levels, recent insider buying or selling disclosures, SAST triggers. What does promoter behavior signal? 2-3 sentences."
+  },
+  {
+    name: "Retail Crowd",
+    formula: "SIP Flow · Demat Accounts · Retail Ownership Trend",
+    prompt: "As Gemini AI, analyze retail investor behavior for {SYMBOL}. Discuss SIP inflow trends, new demat account growth, retail ownership concentration, FOMO vs Fear sentiment. Contrarian or momentum signal from retail crowd behavior? 2-3 sentences."
+  }
+];
+
+// ============================================================
+// RENDER ROWS
+// ============================================================
+function renderRows(containerId, legends, pillarClass) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  legends.forEach((leg, i) => {
+    const row = document.createElement('div');
+    row.className = 'row-item';
+    row.id = `${containerId}_row_${i}`;
+    row.innerHTML = `
+      <div class="row-name">
+        <div class="legend-name">${leg.name}</div>
+        <div class="legend-formula">${leg.formula}</div>
+      </div>
+      <div class="row-result" id="${containerId}_result_${i}">
+        <div class="placeholder-text">— AWAITING SCAN —</div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clockSpan').textContent =
+    now.toLocaleTimeString('en-IN', {hour12:false});
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ============================================================
+// STATUS HELPERS
+// ============================================================
+function setStatus(msg, type='idle') {
+  document.getElementById('statusMsg').textContent = msg;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot ' + (type==='live'?'dot-live':type==='proc'?'dot-proc':'dot-idle');
+  dot.style.color = type==='live'?'var(--green)':type==='proc'?'var(--gold)':'var(--dim)';
+}
+
+// ============================================================
+// CLAUDE API CALL
+// ============================================================
+async function callClaude(prompt) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  const data = await response.json();
+  if (data.content && data.content[0]) return data.content[0].text;
+  throw new Error("No response");
+}
+
+// ============================================================
+// PARSE SIGNAL FROM TEXT
+// ============================================================
+function parseSignal(text) {
+  const t = text.toLowerCase();
+  const bullWords = ['bullish','buy','upside','positive','long','breakout','accumulate','rising','upward','strength'];
+  const bearWords = ['bearish','sell','downside','negative','short','breakdown','distribute','falling','downward','weakness'];
+  let bScore = 0, beScore = 0;
+  bullWords.forEach(w => { if(t.includes(w)) bScore++; });
+  bearWords.forEach(w => { if(t.includes(w)) beScore++; });
+  if (bScore > beScore) return 'BULLISH';
+  if (beScore > bScore) return 'BEARISH';
+  return 'NEUTRAL';
+}
+
+// ============================================================
+// RENDER RESULT
+// ============================================================
+function renderResult(containerId, index, text, signal) {
+  const cell = document.getElementById(`${containerId}_result_${index}`);
+  const sigClass = signal==='BULLISH'?'sig-bull':signal==='BEARISH'?'sig-bear':'sig-neut';
+  cell.innerHTML = `
+    <div class="result-content">
+      <div class="result-signal ${sigClass}">${signal==='BULLISH'?'▲ BULLISH':signal==='BEARISH'?'▼ BEARISH':'◆ NEUTRAL'}</div>
+      <div class="result-text">${text}</div>
+    </div>
+  `;
+}
+
+// ============================================================
+// SCORE CALCULATOR
+// ============================================================
+function calculateScore(results) {
+  if (!results.length) return 0;
+  let score = 0;
+  results.forEach(r => {
+    if (r === 'BULLISH') score += 10;
+    else if (r === 'BEARISH') score -= 10;
+  });
+  const raw = (score / (results.length * 10)) * 100;
+  return Math.round(raw);
+}
+
+// ============================================================
+// UPDATE GAUGE
+// ============================================================
+function updateGauge(pct) {
+  const absPct = Math.abs(pct);
+  const circumference = 283;
+  const offset = circumference - (absPct / 100) * circumference;
+  const fill = document.getElementById('gaugeFill');
+  fill.style.strokeDashoffset = offset;
+  const isBull = pct >= 0;
+  fill.style.stroke = isBull ? '#00FF88' : '#FF3366';
+  const gaugePct = document.getElementById('gaugePct');
+  gaugePct.textContent = absPct + '%';
+  gaugePct.style.color = isBull ? '#00FF88' : '#FF3366';
+  document.getElementById('successPct').textContent = isBull ? absPct+'%' : (100-absPct)+'%';
+  document.getElementById('failPct').textContent = isBull ? (100-absPct)+'%' : absPct+'%';
+}
+
+// ============================================================
+// FINAL VERDICT
+// ============================================================
+async function generateFinalVerdict(symbol, p1Results, p2Results, p3Results, p1Score, p2Score, p3Score) {
+  const overall = Math.round((p1Score + p2Score + p3Score) / 3);
+  const prompt = `You are Claude AI acting as the FINAL JUDGE for a multi-pillar trading scanner.
+
+Symbol: ${symbol}
+
+PILLAR 1 (Masters - Technical): Score ${p1Score}% bullish
+Signals: ${p1Results.join(', ')}
+
+PILLAR 2 (Claude - Numerical/OI): Score ${p2Score}% bullish  
+Signals: ${p2Results.join(', ')}
+
+PILLAR 3 (Gemini - Sentiment): Score ${p3Score}% bullish
+Signals: ${p3Results.join(', ')}
+
+OVERALL COMPOSITE: ${overall}%
+
+Based on all three pillars, provide:
+1. FINAL VERDICT: Is this trade RECOMMENDED or NOT RECOMMENDED?
+2. SUCCESS PROBABILITY: What % chance does this trade have of succeeding?
+3. KEY REASONING: Why in 3-4 clear, concise sentences.
+4. RISK WARNING: One key risk to watch.
+
+Format your response as a clear trading judgment. Be direct and decisive.`;
+
+  const text = await callClaude(prompt);
+  return text;
+}
+
+// ============================================================
+// MAIN SCAN FUNCTION
+// ============================================================
+async function runScan() {
+  const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
+  if (!symbol) {
+    document.getElementById('symbolInput').focus();
+    return;
+  }
+
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⚡</span> SCANNING...';
+
+  setStatus(`INITIALIZING SCAN FOR ${symbol}...`, 'proc');
+
+  // Reset all rows
+  const resetRows = (containerId, count) => {
+    for(let i=0;i<count;i++) {
+      const cell = document.getElementById(`${containerId}_result_${i}`);
+      if(cell) cell.innerHTML = `<span class="loading">⚡ ANALYZING...</span>`;
+    }
+  };
+  resetRows('p1rows', 10);
+  resetRows('p2rows', 10);
+  resetRows('p3rows', 10);
+
+  // Reset verdict
+  document.getElementById('verdictAnalysis').className = 'verdict-text-block empty';
+  document.getElementById('verdictAnalysis').textContent = 'GATHERING DATA FROM ALL PILLARS...';
+  document.getElementById('verdictStatus').textContent = '◎ SCANNING IN PROGRESS';
+  document.getElementById('gaugeFill').style.strokeDashoffset = 283;
+  document.getElementById('gaugePct').textContent = '--';
+  document.getElementById('gaugePct').style.color = 'rgba(255,255,255,0.2)';
+  document.getElementById('successPct').textContent = '--%';
+  document.getElementById('failPct').textContent = '--%';
+
+  const p1Results = [];
+  const p2Results = [];
+  const p3Results = [];
+
+  // ---- PILLAR 1 ----
+  setStatus(`PILLAR 1: MASTERS ANALYSIS FOR ${symbol}...`, 'live');
+  for(let i=0; i<PILLAR1_LEGENDS.length; i++) {
+    const leg = PILLAR1_LEGENDS[i];
+    try {
+      const prompt = leg.prompt.replace(/{SYMBOL}/g, symbol);
+      const text = await callClaude(prompt);
+      const sig = parseSignal(text);
+      p1Results.push(sig);
+      renderResult('p1rows', i, text, sig);
+      // Update P1 bar live
+      const p1s = calculateScore(p1Results);
+      const p1abs = Math.abs(p1s);
+      document.getElementById('p1score').textContent = p1abs+'%';
+      document.getElementById('p1bar').style.width = p1abs+'%';
+    } catch(e) {
+      p1Results.push('NEUTRAL');
+      const cell = document.getElementById(`p1rows_result_${i}`);
+      if(cell) cell.innerHTML = `<div class="placeholder-text">ERROR — RETRY</div>`;
+    }
+  }
+
+  // ---- PILLAR 2 ----
+  setStatus(`PILLAR 2: NUMERICAL RESEARCH FOR ${symbol}...`, 'live');
+  for(let i=0; i<PILLAR2_INDICATORS.length; i++) {
+    const ind = PILLAR2_INDICATORS[i];
+    try {
+      const prompt = ind.prompt.replace(/{SYMBOL}/g, symbol);
+      const text = await callClaude(prompt);
+      const sig = parseSignal(text);
+      p2Results.push(sig);
+      renderResult('p2rows', i, text, sig);
+      const p2s = calculateScore(p2Results);
+      const p2abs = Math.abs(p2s);
+      document.getElementById('p2score').textContent = p2abs+'%';
+      document.getElementById('p2bar').style.width = p2abs+'%';
+    } catch(e) {
+      p2Results.push('NEUTRAL');
+    }
+  }
+
+  // ---- PILLAR 3 ----
+  setStatus(`PILLAR 3: GEMINI SENTIMENT FOR ${symbol}...`, 'live');
+  for(let i=0; i<PILLAR3_GEMINI.length; i++) {
+    const gem = PILLAR3_GEMINI[i];
+    try {
+      const prompt = gem.prompt.replace(/{SYMBOL}/g, symbol);
+      const text = await callClaude(prompt);
+      const sig = parseSignal(text);
+      p3Results.push(sig);
+      renderResult('p3rows', i, text, sig);
+      const p3s = calculateScore(p3Results);
+      const p3abs = Math.abs(p3s);
+      document.getElementById('p3score').textContent = p3abs+'%';
+      document.getElementById('p3bar').style.width = p3abs+'%';
+    } catch(e) {
+      p3Results.push('NEUTRAL');
+    }
+  }
+
+  // ---- FINAL VERDICT ----
+  setStatus(`CLAUDE COMPUTING FINAL VERDICT FOR ${symbol}...`, 'proc');
+  document.getElementById('verdictStatus').textContent = '⚡ CLAUDE COMPUTING FINAL VERDICT...';
+
+  const p1Score = calculateScore(p1Results);
+  const p2Score = calculateScore(p2Results);
+  const p3Score = calculateScore(p3Results);
+  const overall = Math.round((p1Score + p2Score + p3Score) / 3);
+
+  try {
+    const verdictText = await generateFinalVerdict(symbol, p1Results, p2Results, p3Results, p1Score, p2Score, p3Score);
+
+    document.getElementById('verdictAnalysis').className = 'verdict-text-block';
+    document.getElementById('verdictAnalysis').textContent = verdictText;
+    document.getElementById('verdictStatus').textContent = `✓ SCAN COMPLETE — ${symbol}`;
+
+    updateGauge(overall);
+
+    // Decision
+    const decEl = document.getElementById('verdictDecision');
+    const absPct = Math.abs(overall);
+    const succPct = overall >= 0 ? absPct : 100-absPct;
+    const verdict_text_low = verdictText.toLowerCase();
+
+    let decWord, decClass, confText;
+    if (overall >= 40) {
+      decWord = 'BUY'; decClass = 'dec-buy';
+      confText = `${succPct}% SUCCESS PROBABILITY`;
+    } else if (overall <= -30) {
+      decWord = 'SELL / AVOID'; decClass = 'dec-sell';
+      confText = `${100-succPct}% DOWNSIDE RISK`;
+    } else {
+      decWord = 'WAIT & WATCH'; decClass = 'dec-wait';
+      confText = `MIXED SIGNALS — ${absPct}% CONVICTION`;
+    }
+    decEl.className = `verdict-decision ${decClass}`;
+    decEl.innerHTML = `
+      <div class="decision-label">CLAUDE COMMAND</div>
+      <div class="decision-word">${decWord}</div>
+      <div class="decision-conf">${confText}</div>
+    `;
+
+  } catch(e) {
+    document.getElementById('verdictAnalysis').className = 'verdict-text-block';
+    document.getElementById('verdictAnalysis').textContent = 'Error generating final verdict. Individual pillar analysis complete above.';
+  }
+
+  setStatus(`SCAN COMPLETE FOR ${symbol} — ALL ${p1Results.length + p2Results.length + p3Results.length} INDICATORS ANALYZED`, 'idle');
+  btn.disabled = false;
+  btn.innerHTML = '⚡ SCAN NOW';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderRows('p1rows', PILLAR1_LEGENDS, 'p1');
+renderRows('p2rows', PILLAR2_INDICATORS, 'p2');
+renderRows('p3rows', PILLAR3_GEMINI, 'p3');
+
+document.getElementById('symbolInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') runScan();
+});
+</script>
+</body>
+</html>

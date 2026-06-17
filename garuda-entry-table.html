@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>GARUDA POWER — ENTRY TABLE</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020408;--bg2:#050c12;--panel:#080f18;
+  --border:#0f2030;--border2:#1a3548;
+  --gold:#f0a500;--gold2:#ffc844;
+  --green:#00e87a;--green2:#00ff88;
+  --red:#ff2244;--blue:#0088ff;--blue2:#40aaff;
+  --purple:#aa00ff;--purple2:#cc44ff;
+  --orange:#ff6b00;--orange2:#ff9240;
+  --text:#a0c4d8;--text2:#4a7a90;--dim:#1a3040;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,136,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,136,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* HEADER */
+.hdr{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#050c18,#080f20);border-bottom:1px solid var(--border2);padding:10px 14px;}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--orange),var(--gold),transparent);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;background:radial-gradient(circle,#3a2000,#0a0500);box-shadow:0 0 15px rgba(240,165,0,0.3);}
+.logo-text h1{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;color:var(--gold);letter-spacing:2px;}
+.logo-text p{font-size:9px;color:var(--text2);letter-spacing:2px;}
+.clock{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--gold);border:1px solid var(--border2);padding:4px 10px;border-radius:3px;}
+
+/* TABS */
+.tabs{position:relative;z-index:1;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:10px;text-align:center;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:all 0.2s;}
+.tab.act{color:var(--gold);border-bottom-color:var(--gold);background:rgba(240,165,0,0.05);}
+
+.wrap{position:relative;z-index:1;padding:10px;padding-bottom:70px;}
+
+/* SECTION */
+.section{display:none;}
+.section.act{display:block;}
+
+/* INDEX ENTRY */
+.scale-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.stab{padding:6px 14px;background:var(--bg2);border:1px solid var(--border);font-size:10px;letter-spacing:1px;cursor:pointer;border-radius:3px;color:var(--text2);}
+.stab.act{background:rgba(240,165,0,0.15);border-color:var(--gold);color:var(--gold);}
+
+.card{background:var(--panel);border:1px solid var(--border2);border-radius:4px;margin-bottom:10px;overflow:hidden;}
+.card-head{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.card-title{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;}
+.card-body{padding:12px;}
+
+/* INPUT FIELDS */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:9px;color:var(--text2);letter-spacing:1px;}
+.field input,.field select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono',monospace;font-size:12px;border-radius:3px;width:100%;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold);}
+.field input.qty-input{color:var(--gold);border-color:rgba(240,165,0,0.3);}
+
+/* RESULT BOXES */
+.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px;}
+.result-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;}
+.rbox{background:var(--bg2);border:1px solid var(--border);padding:8px;border-radius:3px;text-align:center;}
+.rbox-label{font-size:9px;color:var(--text2);letter-spacing:1px;margin-bottom:3px;}
+.rbox-val{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;}
+.r-entry{color:var(--green);}
+.r-sl{color:var(--red);}
+.r-t1{color:var(--gold);}
+.r-t2{color:var(--orange);}
+.r-t3{color:var(--purple2);}
+.r-rr{color:var(--blue2);}
+.r-pnl{color:var(--green2);}
+.r-loss{color:var(--red);}
+
+/* SUPPORT RESISTANCE */
+.sr-table{width:100%;border-collapse:collapse;}
+.sr-table th{padding:5px 8px;background:var(--bg2);color:var(--text2);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:center;}
+.sr-table td{padding:6px 8px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;}
+.sr-r{color:var(--red);}
+.sr-s{color:var(--green);}
+.sr-pp{color:var(--gold);}
+.sr-fib{color:var(--purple2);}
+.sr-tag{font-size:9px;padding:2px 6px;border-radius:2px;}
+
+/* VOLUME INDICATOR */
+.vol-bar{margin-top:6px;}
+.vol-label{display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-bottom:3px;}
+.vol-track{height:8px;background:var(--dim);border-radius:4px;overflow:hidden;}
+.vol-fill{height:100%;border-radius:4px;transition:width 0.5s;}
+.vol-normal{background:var(--blue);}
+.vol-high{background:var(--green);}
+.vol-vhigh{background:var(--gold);}
+
+/* FIBONACCI */
+.fib-section{margin-top:8px;}
+.fib-title{font-size:9px;color:var(--text2);letter-spacing:1px;margin-bottom:6px;}
+.fib-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.fib-box{background:var(--bg2);border:1px solid var(--border);padding:5px;text-align:center;border-radius:2px;}
+.fib-pct{font-size:9px;color:var(--purple2);margin-bottom:2px;}
+.fib-price{font-family:'Share Tech Mono',monospace;font-size:11px;}
+
+/* SIGNAL BADGE */
+.sig-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:3px;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;}
+.sig-buy{background:rgba(0,232,122,0.15);border:1px solid var(--green);color:var(--green);}
+.sig-sell{background:rgba(255,34,68,0.15);border:1px solid var(--red);color:var(--red);}
+.sig-wait{background:rgba(240,165,0,0.15);border:1px solid var(--gold);color:var(--gold);}
+
+/* BUTTONS */
+.btn-calc{width:100%;padding:9px;background:linear-gradient(90deg,rgba(0,232,122,0.15),rgba(0,136,255,0.15));border:1px solid var(--green);color:var(--green2);font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:3px;margin-bottom:6px;}
+.btn-add{width:100%;padding:9px;background:linear-gradient(90deg,rgba(240,165,0,0.15),rgba(255,107,0,0.15));border:1px solid var(--gold);color:var(--gold);font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:3px;}
+.btn-calc:hover{background:rgba(0,232,122,0.25);}
+.btn-add:hover{background:rgba(240,165,0,0.25);}
+
+/* TRADE LOG TABLE */
+.log-table{width:100%;border-collapse:collapse;font-size:10px;}
+.log-table th{padding:5px 6px;background:var(--bg2);color:var(--text2);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);}
+.log-table td{padding:6px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:10px;}
+.log-table tr:hover td{background:rgba(240,165,0,0.03);}
+.exit-btn{padding:2px 8px;background:rgba(255,34,68,0.15);border:1px solid var(--red);color:var(--red);font-size:9px;cursor:pointer;border-radius:2px;}
+.pnl-p{color:var(--green);}
+.pnl-n{color:var(--red);}
+.tag{padding:2px 5px;border-radius:2px;font-size:8px;letter-spacing:1px;}
+.tag-b{background:rgba(0,232,122,0.15);color:var(--green);border:1px solid var(--green);}
+.tag-s{background:rgba(255,34,68,0.15);color:var(--red);border:1px solid var(--red);}
+.tag-h{background:rgba(240,165,0,0.15);color:var(--gold);border:1px solid var(--gold);}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#030810;border-top:1px solid var(--border2);display:flex;z-index:100;}
+.bn{flex:1;padding:10px 4px;text-align:center;cursor:pointer;border:none;background:none;color:var(--text2);font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:1px;}
+.bn.act,.bn:hover{color:var(--gold);}
+.bn.act{border-top:2px solid var(--gold);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:10px 0;}
+.section-label{font-size:9px;color:var(--text2);letter-spacing:2px;margin-bottom:8px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-icon">🦅</div>
+    <div class="logo-text">
+      <h1>GARUDA POWER</h1>
+      <p>ENTRY TABLE SYSTEM</p>
+    </div>
+  </div>
+  <div class="clock" id="clock">--:--:--</div>
+</div>
+
+<!-- MAIN TABS -->
+<div class="tabs">
+  <div class="tab act" onclick="showTab('index')">INDEX</div>
+  <div class="tab" onclick="showTab('stocks')">STOCKS</div>
+  <div class="tab" onclick="showTab('log')">TRADE LOG</div>
+</div>
+
+<div class="wrap">
+
+<!-- ═══════════════════════════════════════ -->
+<!-- TAB 1: INDEX ENTRY -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section act" id="sec-index">
+
+  <div class="scale-tabs">
+    <div class="stab act" onclick="showScale('intraday')">INTRADAY</div>
+    <div class="stab" onclick="showScale('expiry')">EXPIRY (4 CANDLE)</div>
+  </div>
+
+  <!-- INTRADAY SCALE -->
+  <div id="scale-intraday">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title" style="color:var(--blue2)">INDEX — INTRADAY ENTRY</span>
+        <span class="sig-badge sig-wait" id="idx-intra-sig">WAIT</span>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>SYMBOL</label>
+            <select id="idx-sym" onchange="calcIndex()">
+              <option>NIFTY</option>
+              <option>BANKNIFTY</option>
+              <option>SENSEX</option>
+              <option>FINNIFTY</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>OPTION TYPE</label>
+            <select id="idx-type">
+              <option>CE (CALL)</option>
+              <option>PE (PUT)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row-3">
+          <div class="field">
+            <label>PREV HIGH</label>
+            <input type="number" id="idx-high" placeholder="24500" oninput="calcIndex()">
+          </div>
+          <div class="field">
+            <label>PREV LOW</label>
+            <input type="number" id="idx-low" placeholder="24200" oninput="calcIndex()">
+          </div>
+          <div class="field">
+            <label>PREV CLOSE</label>
+            <input type="number" id="idx-close" placeholder="24350" oninput="calcIndex()">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>LOTS (खाली — आप भरो)</label>
+            <input type="number" id="idx-lots" class="qty-input" placeholder="1" oninput="calcIndex()">
+          </div>
+          <div class="field">
+            <label>LOT SIZE</label>
+            <select id="idx-lotsize" onchange="calcIndex()">
+              <option value="50">NIFTY — 50</option>
+              <option value="15">BANKNIFTY — 15</option>
+              <option value="10">SENSEX — 10</option>
+              <option value="40">FINNIFTY — 40</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">ENTRY LEVELS</div>
+
+        <div class="result-grid-4">
+          <div class="rbox"><div class="rbox-label">ENTRY</div><div class="rbox-val r-entry" id="ii-entry">--</div></div>
+          <div class="rbox"><div class="rbox-label">STOP LOSS</div><div class="rbox-val r-sl" id="ii-sl">--</div></div>
+          <div class="rbox"><div class="rbox-label">TARGET 1</div><div class="rbox-val r-t1" id="ii-t1">--</div></div>
+          <div class="rbox"><div class="rbox-label">TARGET 2</div><div class="rbox-val r-t2" id="ii-t2">--</div></div>
+        </div>
+        <div class="result-grid">
+          <div class="rbox"><div class="rbox-label">MAX PROFIT</div><div class="rbox-val r-pnl" id="ii-profit">--</div></div>
+          <div class="rbox"><div class="rbox-label">MAX LOSS</div><div class="rbox-val r-loss" id="ii-loss">--</div></div>
+        </div>
+
+        <button class="btn-calc" onclick="calcIndex()">⚡ CALCULATE</button>
+        <button class="btn-add" onclick="addTrade('INDEX-INTRADAY')">+ ADD TO TRADE LOG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPIRY SCALE -->
+  <div id="scale-expiry" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title" style="color:var(--purple2)">INDEX — EXPIRY (4 CANDLE)</span>
+        <span class="sig-badge sig-wait" id="idx-exp-sig">WAIT</span>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>SYMBOL</label>
+            <select id="exp-sym" onchange="calcExpiry()">
+              <option>NIFTY</option>
+              <option>BANKNIFTY</option>
+              <option>SENSEX</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>EXPIRY</label>
+            <select id="exp-date">
+              <option>THIS WEEK</option>
+              <option>NEXT WEEK</option>
+              <option>MONTHLY</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row-3">
+          <div class="field">
+            <label>C1 HIGH</label>
+            <input type="number" id="c1h" placeholder="24500" oninput="calcExpiry()">
+          </div>
+          <div class="field">
+            <label>C2 HIGH</label>
+            <input type="number" id="c2h" placeholder="24520" oninput="calcExpiry()">
+          </div>
+          <div class="field">
+            <label>C3 HIGH</label>
+            <input type="number" id="c3h" placeholder="24540" oninput="calcExpiry()">
+          </div>
+          <div class="field">
+            <label>C4 HIGH</label>
+            <input type="number" id="c4h" placeholder="24560" oninput="calcExpiry()">
+          </div>
+          <div class="field">
+            <label>4C LOW</label>
+            <input type="number" id="c4l" placeholder="24200" oninput="calcExpiry()">
+          </div>
+          <div class="field">
+            <label>LOTS (खाली)</label>
+            <input type="number" id="exp-lots" class="qty-input" placeholder="1" oninput="calcExpiry()">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">4 CANDLE MOMENTUM LEVELS</div>
+
+        <div class="result-grid-4">
+          <div class="rbox"><div class="rbox-label">ENTRY</div><div class="rbox-val r-entry" id="ei-entry">--</div></div>
+          <div class="rbox"><div class="rbox-label">STOP LOSS</div><div class="rbox-val r-sl" id="ei-sl">--</div></div>
+          <div class="rbox"><div class="rbox-label">T1</div><div class="rbox-val r-t1" id="ei-t1">--</div></div>
+          <div class="rbox"><div class="rbox-label">T2</div><div class="rbox-val r-t2" id="ei-t2">--</div></div>
+        </div>
+        <div class="result-grid">
+          <div class="rbox"><div class="rbox-label">T3</div><div class="rbox-val r-t3" id="ei-t3">--</div></div>
+          <div class="rbox"><div class="rbox-label">R:R RATIO</div><div class="rbox-val r-rr" id="ei-rr">--</div></div>
+        </div>
+
+        <button class="btn-calc" onclick="calcExpiry()">⚡ CALCULATE</button>
+        <button class="btn-add" onclick="addTrade('INDEX-EXPIRY')">+ ADD TO TRADE LOG</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- TAB 2: STOCKS ENTRY -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="sec-stocks">
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title" style="color:var(--gold)">STOCK ENTRY — FIBO + PIVOT + ATR + VOLUME</span>
+      <span class="sig-badge sig-wait" id="stk-sig">WAIT</span>
+    </div>
+    <div class="card-body">
+
+      <!-- SYMBOL -->
+      <div class="field-row">
+        <div class="field">
+          <label>SYMBOL</label>
+          <select id="stk-sym" onchange="calcStock()">
+            <optgroup label="NIFTY 50">
+              <option>RELIANCE</option><option>TCS</option><option>INFY</option>
+              <option>HDFCBANK</option><option>ICICIBANK</option><option>SBIN</option>
+              <option>WIPRO</option><option>AXISBANK</option><option>KOTAKBANK</option>
+              <option>LT</option><option>BAJFINANCE</option><option>MARUTI</option>
+              <option>TATAMOTORS</option><option>ADANIENT</option><option>HINDUNILVR</option>
+              <option>ITC</option><option>SUNPHARMA</option><option>TITAN</option>
+              <option>ULTRACEMCO</option><option>NESTLEIND</option><option>ASIANPAINT</option>
+              <option>HCLTECH</option><option>POWERGRID</option><option>NTPC</option>
+              <option>ONGC</option><option>BAJAJFINSV</option><option>BHARTIARTL</option>
+            </optgroup>
+            <optgroup label="MIDCAP">
+              <option>MUTHOOTFIN</option><option>PNB</option><option>CANBK</option>
+              <option>FEDERALBNK</option><option>INDUSINDBK</option><option>CHOLAFIN</option>
+              <option>MOTHERSON</option><option>APOLLOHOSP</option><option>FORTIS</option>
+              <option>VOLTAS</option><option>CROMPTON</option><option>HAVELLS</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field">
+          <label>TRADE TYPE</label>
+          <select id="stk-trade-type">
+            <option>DELIVERY (CNC)</option>
+            <option>INTRADAY (MIS)</option>
+            <option>F&O OPTIONS</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- OHLCV INPUT -->
+      <div class="section-label">OHLCV DATA (कल का candle)</div>
+      <div class="field-row-3">
+        <div class="field"><label>HIGH</label><input type="number" id="s-high" placeholder="2950" oninput="calcStock()"></div>
+        <div class="field"><label>LOW</label><input type="number" id="s-low" placeholder="2850" oninput="calcStock()"></div>
+        <div class="field"><label>CLOSE</label><input type="number" id="s-close" placeholder="2900" oninput="calcStock()"></div>
+        <div class="field"><label>OPEN</label><input type="number" id="s-open" placeholder="2880" oninput="calcStock()"></div>
+        <div class="field"><label>ATR (14)</label><input type="number" id="s-atr" placeholder="35" oninput="calcStock()"></div>
+        <div class="field"><label>AVG VOLUME</label><input type="number" id="s-avgvol" placeholder="1000000" oninput="calcStock()"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>CURRENT VOLUME</label><input type="number" id="s-curvol" placeholder="1500000" oninput="calcStock()"></div>
+        <div class="field">
+          <label>QTY (खाली — आप भरो)</label>
+          <input type="number" id="s-qty" class="qty-input" placeholder="100" oninput="calcStock()">
+        </div>
+      </div>
+
+      <!-- VOLUME BAR -->
+      <div class="vol-bar">
+        <div class="vol-label"><span>VOLUME STRENGTH</span><span id="vol-pct">--</span></div>
+        <div class="vol-track"><div class="vol-fill vol-normal" id="vol-bar-fill" style="width:0%"></div></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- PIVOT POINTS -->
+      <div class="section-label">📐 PIVOT POINTS (PP = H+L+C / 3)</div>
+      <div class="result-grid-4">
+        <div class="rbox"><div class="rbox-label">R3</div><div class="rbox-val sr-r" id="p-r3">--</div></div>
+        <div class="rbox"><div class="rbox-label">R2</div><div class="rbox-val sr-r" id="p-r2">--</div></div>
+        <div class="rbox"><div class="rbox-label">R1</div><div class="rbox-val sr-r" id="p-r1">--</div></div>
+        <div class="rbox" style="border-color:var(--gold)"><div class="rbox-label">PP</div><div class="rbox-val" style="color:var(--gold)" id="p-pp">--</div></div>
+      </div>
+      <div class="result-grid-4">
+        <div class="rbox"><div class="rbox-label">S1</div><div class="rbox-val sr-s" id="p-s1">--</div></div>
+        <div class="rbox"><div class="rbox-label">S2</div><div class="rbox-val sr-s" id="p-s2">--</div></div>
+        <div class="rbox"><div class="rbox-label">S3</div><div class="rbox-val sr-s" id="p-s3">--</div></div>
+        <div class="rbox"><div class="rbox-label">R:R</div><div class="rbox-val r-rr" id="p-rr">--</div></div>
+      </div>
+
+      <!-- FIBONACCI -->
+      <div class="section-label">🌀 FIBONACCI LEVELS</div>
+      <div class="fib-grid" id="fib-grid">
+        <div class="fib-box"><div class="fib-pct">0.236</div><div class="fib-price" id="f236">--</div></div>
+        <div class="fib-box"><div class="fib-pct">0.382</div><div class="fib-price" id="f382">--</div></div>
+        <div class="fib-box" style="border-color:var(--gold)"><div class="fib-pct" style="color:var(--gold)">0.500</div><div class="fib-price" id="f500">--</div></div>
+        <div class="fib-box" style="border-color:var(--purple2)"><div class="fib-pct">0.618</div><div class="fib-price" id="f618">--</div></div>
+        <div class="fib-box"><div class="fib-pct">1.272</div><div class="fib-price" id="f1272">--</div></div>
+        <div class="fib-box"><div class="fib-pct">1.618</div><div class="fib-price" id="f1618">--</div></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ATR BASED ENTRY -->
+      <div class="section-label">⚡ ATR ENTRY LEVELS</div>
+      <div class="result-grid-4">
+        <div class="rbox"><div class="rbox-label">BUY ENTRY</div><div class="rbox-val r-entry" id="s-entry">--</div></div>
+        <div class="rbox"><div class="rbox-label">STOP LOSS</div><div class="rbox-val r-sl" id="s-sl">--</div></div>
+        <div class="rbox"><div class="rbox-label">TARGET 1</div><div class="rbox-val r-t1" id="s-t1">--</div></div>
+        <div class="rbox"><div class="rbox-label">TARGET 2</div><div class="rbox-val r-t2" id="s-t2">--</div></div>
+      </div>
+      <div class="result-grid">
+        <div class="rbox"><div class="rbox-label">TARGET 3</div><div class="rbox-val r-t3" id="s-t3">--</div></div>
+        <div class="rbox"><div class="rbox-label">MAX PROFIT (QTY × T3)</div><div class="rbox-val r-pnl" id="s-profit">--</div></div>
+        <div class="rbox"><div class="rbox-label">MAX LOSS (QTY × SL)</div><div class="rbox-val r-loss" id="s-loss">--</div></div>
+        <div class="rbox"><div class="rbox-label">R:R RATIO</div><div class="rbox-val r-rr" id="s-rr">--</div></div>
+      </div>
+
+      <button class="btn-calc" onclick="calcStock()">⚡ CALCULATE ALL</button>
+      <button class="btn-add" onclick="addTrade('STOCK')">+ ADD TO TRADE LOG</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- TAB 3: TRADE LOG -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="sec-log">
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title" style="color:var(--blue2)">TRADE LOG</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green)" id="total-pnl">P&L: +₹0</span>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>SYMBOL</th>
+            <th>TYPE</th>
+            <th>QTY</th>
+            <th>ENTRY</th>
+            <th>SL</th>
+            <th>T1</th>
+            <th>T2</th>
+            <th>T3</th>
+            <th>STATUS</th>
+            <th>P&L</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="log-body">
+          <tr><td colspan="11" style="text-align:center;color:var(--text2);padding:20px;font-size:11px;">कोई trade नहीं — Entry box से add करो</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- wrap -->
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bn" onclick="location.href='garuda-power-a.html'">HOME</button>
+  <button class="bn" onclick="location.href='garuda-master-panel.html'">PANEL</button>
+  <button class="bn act">ENTRY</button>
+  <button class="bn" onclick="location.href='garuda-monitoring.html'">MONITOR</button>
+  <button class="bn" onclick="location.href='garuda-power-k.html'">SIGNALS</button>
+</div>
+
+<script>
+// CLOCK
+setInterval(()=>{
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    String(n.getHours()).padStart(2,'0')+':'+
+    String(n.getMinutes()).padStart(2,'0')+':'+
+    String(n.getSeconds()).padStart(2,'0');
+},1000);
+
+// TABS
+function showTab(t){
+  document.querySelectorAll('.tab').forEach((e,i)=>e.classList.toggle('act',['index','stocks','log'][i]===t));
+  ['index','stocks','log'].forEach(s=>document.getElementById('sec-'+s).classList.toggle('act',s===t));
+}
+
+// SCALE TABS
+function showScale(s){
+  document.querySelectorAll('.stab').forEach((e,i)=>e.classList.toggle('act',['intraday','expiry'][i]===s));
+  document.getElementById('scale-intraday').style.display=s==='intraday'?'block':'none';
+  document.getElementById('scale-expiry').style.display=s==='expiry'?'block':'none';
+}
+
+// ── INDEX INTRADAY CALC ──
+function calcIndex(){
+  const h=+document.getElementById('idx-high').value||24500;
+  const l=+document.getElementById('idx-low').value||24200;
+  const c=+document.getElementById('idx-close').value||24350;
+  const lots=+document.getElementById('idx-lots').value||1;
+  const ls=+document.getElementById('idx-lotsize').value||50;
+  const qty=lots*ls;
+  const atr=(h-l)*0.5;
+  const entry=+(h+h*0.001).toFixed(2); // Breakout: prev high + 0.1%
+  const sl=+(l).toFixed(2);
+  const t1=+(entry+atr).toFixed(2);
+  const t2=+(entry+atr*2).toFixed(2);
+  const profit=+((t2-entry)*qty).toFixed(0);
+  const loss=+((entry-sl)*qty).toFixed(0);
+  document.getElementById('ii-entry').textContent=entry.toLocaleString('en-IN');
+  document.getElementById('ii-sl').textContent=sl.toLocaleString('en-IN');
+  document.getElementById('ii-t1').textContent=t1.toLocaleString('en-IN');
+  document.getElementById('ii-t2').textContent=t2.toLocaleString('en-IN');
+  document.getElementById('ii-profit').textContent='₹'+profit.toLocaleString('en-IN');
+  document.getElementById('ii-loss').textContent='₹'+loss.toLocaleString('en-IN');
+  const sig=document.getElementById('idx-intra-sig');
+  if(c>h*0.995){sig.className='sig-badge sig-buy';sig.textContent='BUY SETUP';}
+  else if(c<l*1.005){sig.className='sig-badge sig-sell';sig.textContent='SELL SETUP';}
+  else{sig.className='sig-badge sig-wait';sig.textContent='WAIT';}
+}
+
+// ── INDEX EXPIRY CALC ──
+function calcExpiry(){
+  const vals=[
+    +document.getElementById('c1h').value||24500,
+    +document.getElementById('c2h').value||24520,
+    +document.getElementById('c3h').value||24540,
+    +document.getElementById('c4h').value||24560,
+  ];
+  const low4=+document.getElementById('c4l').value||24200;
+  const lots=+document.getElementById('exp-lots').value||1;
+  const momentum=vals[3]>vals[2]&&vals[2]>vals[1]&&vals[1]>vals[0];
+  const entry=+(vals[3]*1.001).toFixed(2);
+  const sl=+low4.toFixed(2);
+  const range=entry-sl;
+  const t1=+(entry+range*1.5).toFixed(2);
+  const t2=+(entry+range*2.5).toFixed(2);
+  const t3=+(entry+range*4).toFixed(2);
+  const rr=+((t1-entry)/range).toFixed(2);
+  document.getElementById('ei-entry').textContent=entry.toLocaleString('en-IN');
+  document.getElementById('ei-sl').textContent=sl.toLocaleString('en-IN');
+  document.getElementById('ei-t1').textContent=t1.toLocaleString('en-IN');
+  document.getElementById('ei-t2').textContent=t2.toLocaleString('en-IN');
+  document.getElementById('ei-t3').textContent=t3.toLocaleString('en-IN');
+  document.getElementById('ei-rr').textContent='1:'+rr;
+  const sig=document.getElementById('idx-exp-sig');
+  if(momentum){sig.className='sig-badge sig-buy';sig.textContent='MOMENTUM ↑';}
+  else{sig.className='sig-badge sig-wait';sig.textContent='NO MOMENTUM';}
+}
+
+// ── STOCK CALC ──
+function calcStock(){
+  const h=+document.getElementById('s-high').value||0;
+  const l=+document.getElementById('s-low').value||0;
+  const c=+document.getElementById('s-close').value||0;
+  const atr=+document.getElementById('s-atr').value||0;
+  const avgvol=+document.getElementById('s-avgvol').value||1;
+  const curvol=+document.getElementById('s-curvol').value||0;
+  const qty=+document.getElementById('s-qty').value||0;
+  if(!h||!l||!c) return;
+
+  // PIVOT
+  const pp=+((h+l+c)/3).toFixed(2);
+  const r1=+(2*pp-l).toFixed(2);
+  const r2=+(pp+(h-l)).toFixed(2);
+  const r3=+(h+2*(pp-l)).toFixed(2);
+  const s1=+(2*pp-h).toFixed(2);
+  const s2=+(pp-(h-l)).toFixed(2);
+  const s3=+(l-2*(h-pp)).toFixed(2);
+  document.getElementById('p-pp').textContent=pp;
+  document.getElementById('p-r1').textContent=r1;
+  document.getElementById('p-r2').textContent=r2;
+  document.getElementById('p-r3').textContent=r3;
+  document.getElementById('p-s1').textContent=s1;
+  document.getElementById('p-s2').textContent=s2;
+  document.getElementById('p-s3').textContent=s3;
+  const rr_p=(+(( r1-c)/(c-s1)).toFixed(2));
+  document.getElementById('p-rr').textContent='1:'+rr_p;
+
+  // FIBONACCI
+  const swing=h-l;
+  document.getElementById('f236').textContent=+(h-swing*0.236).toFixed(2);
+  document.getElementById('f382').textContent=+(h-swing*0.382).toFixed(2);
+  document.getElementById('f500').textContent=+(h-swing*0.500).toFixed(2);
+  document.getElementById('f618').textContent=+(h-swing*0.618).toFixed(2);
+  document.getElementById('f1272').textContent=+(h+swing*0.272).toFixed(2);
+  document.getElementById('f1618').textContent=+(h+swing*0.618).toFixed(2);
+
+  // ATR ENTRY
+  const entry=+(c+atr*0.5).toFixed(2);
+  const sl=+(c-atr*1.5).toFixed(2);
+  const t1=+(entry+atr*2).toFixed(2);
+  const t2=+(entry+atr*3.5).toFixed(2);
+  const t3=+(entry+atr*5).toFixed(2);
+  const rr_a=+((t1-entry)/(entry-sl)).toFixed(2);
+  document.getElementById('s-entry').textContent=entry;
+  document.getElementById('s-sl').textContent=sl;
+  document.getElementById('s-t1').textContent=t1;
+  document.getElementById('s-t2').textContent=t2;
+  document.getElementById('s-t3').textContent=t3;
+  document.getElementById('s-rr').textContent='1:'+rr_a;
+  if(qty){
+    document.getElementById('s-profit').textContent='₹'+((t3-entry)*qty).toFixed(0);
+    document.getElementById('s-loss').textContent='₹'+((entry-sl)*qty).toFixed(0);
+  }
+
+  // VOLUME
+  const volRatio=avgvol>0?curvol/avgvol:0;
+  const pct=Math.min(volRatio*100,200);
+  const fill=document.getElementById('vol-bar-fill');
+  fill.style.width=Math.min(pct/2,100)+'%';
+  fill.className='vol-fill '+(volRatio>2?'vol-vhigh':volRatio>1.5?'vol-high':'vol-normal');
+  document.getElementById('vol-pct').textContent=(volRatio>0?(volRatio*100).toFixed(0)+'%':'-');
+
+  // SIGNAL
+  const sig=document.getElementById('stk-sig');
+  const volOk=volRatio>1.5;
+  const abovePP=c>pp;
+  if(abovePP&&volOk&&atr>0){sig.className='sig-badge sig-buy';sig.textContent='BUY SIGNAL';}
+  else if(!abovePP&&volOk){sig.className='sig-badge sig-sell';sig.textContent='SELL SIGNAL';}
+  else{sig.className='sig-badge sig-wait';sig.textContent='WAIT';}
+}
+
+// ADD TRADE TO LOG
+let trades=[];
+function addTrade(type){
+  const isIndex=type.includes('INDEX');
+  const sym=isIndex?(document.getElementById('idx-sym')||{value:'NIFTY'}).value
+                   :document.getElementById('stk-sym').value;
+  const entry=isIndex?document.getElementById('ii-entry').textContent
+                     :document.getElementById('s-entry').textContent;
+  const sl=isIndex?document.getElementById('ii-sl').textContent
+                  :document.getElementById('s-sl').textContent;
+  const t1=isIndex?document.getElementById('ii-t1').textContent
+                  :document.getElementById('s-t1').textContent;
+  const t2=isIndex?document.getElementById('ii-t2').textContent
+                  :document.getElementById('s-t2').textContent;
+  const t3=isIndex?'--':document.getElementById('s-t3').textContent;
+  const qty=isIndex?(document.getElementById('idx-lots').value||'1')+' lot'
+                   :(document.getElementById('s-qty').value||'?')+' qty';
+
+  if(entry==='--'){alert('पहले Calculate करो!');return;}
+
+  const trade={id:Date.now(),sym,type,qty,entry,sl,t1,t2,t3,status:'HOLD',pnl:0};
+  trades.push(trade);
+  renderLog();
+  showTab('log');
+}
+
+function renderLog(){
+  const tbody=document.getElementById('log-body');
+  if(trades.length===0){
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text2);padding:20px;font-size:11px;">कोई trade नहीं — Entry box से add करो</td></tr>';
+    return;
+  }
+  tbody.innerHTML=trades.map(t=>`
+    <tr>
+      <td style="color:var(--gold)">${t.sym}</td>
+      <td><span class="tag tag-b">${t.type}</span></td>
+      <td>${t.qty}</td>
+      <td>${t.entry}</td>
+      <td style="color:var(--red)">${t.sl}</td>
+      <td style="color:var(--gold)">${t.t1}</td>
+      <td style="color:var(--orange)">${t.t2}</td>
+      <td style="color:var(--purple2)">${t.t3}</td>
+      <td><span class="tag tag-h">HOLD</span></td>
+      <td class="pnl-p">+₹0</td>
+      <td><button class="exit-btn" onclick="removeTrade(${t.id})">EXIT</button></td>
+    </tr>`).join('');
+}
+
+function removeTrade(id){
+  if(confirm('Trade exit करें?')){
+    trades=trades.filter(t=>t.id!==id);
+    renderLog();
+  }
+}
+</script>
+</body>
+</html>

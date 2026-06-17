@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRISHUL GREEK FLIP — 16 Strategies Full Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #060b18;
+    --card: #0d1526;
+    --card2: #101c33;
+    --border: #1e3050;
+    --accent-gold: #f0a500;
+    --accent-teal: #00d4aa;
+    --buy: #00e676;
+    --sell: #ff1744;
+    --wait: #ffab00;
+    --live: #69ff47;
+    --text: #cdd6f0;
+    --muted: #5c7099;
+    --page1: #00d4aa;
+    --page2: #7c6fff;
+    --page3: #ff6b35;
+    --page4: #ff4fb8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0a1428 0%, #0d1f3c 100%);
+    border-bottom: 2px solid var(--accent-gold);
+    padding: 20px 24px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: var(--accent-gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .header-subtitle {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .header-pills {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .pill-p1 { background: rgba(0,212,170,0.15); border: 1px solid var(--page1); color: var(--page1); }
+  .pill-p2 { background: rgba(124,111,255,0.15); border: 1px solid var(--page2); color: var(--page2); }
+  .pill-p3 { background: rgba(255,107,53,0.15); border: 1px solid var(--page3); color: var(--page3); }
+  .pill-p4 { background: rgba(255,79,184,0.15); border: 1px solid var(--page4); color: var(--page4); }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 24px;
+    background: #080f1e;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--muted);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-buy { background: var(--buy); }
+  .dot-sell { background: var(--sell); }
+  .dot-wait { background: var(--wait); }
+
+  /* PAGE SECTION */
+  .page-section {
+    padding: 0 16px 24px;
+  }
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+    position: sticky;
+    top: 88px;
+    background: var(--bg);
+    z-index: 50;
+  }
+  .page-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .badge-p1 { background: rgba(0,212,170,0.12); border: 1px solid var(--page1); color: var(--page1); }
+  .badge-p2 { background: rgba(124,111,255,0.12); border: 1px solid var(--page2); color: var(--page2); }
+  .badge-p3 { background: rgba(255,107,53,0.12); border: 1px solid var(--page3); color: var(--page3); }
+  .badge-p4 { background: rgba(255,79,184,0.12); border: 1px solid var(--page4); color: var(--page4); }
+
+  .page-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .page-name-p1 { color: var(--page1); }
+  .page-name-p2 { color: var(--page2); }
+  .page-name-p3 { color: var(--page3); }
+  .page-name-p4 { color: var(--page4); }
+
+  .page-type {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    margin-left: auto;
+  }
+
+  /* STRATEGY CARD */
+  .strategy-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .greek-sym {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 26px;
+    width: 38px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .sym-p1 { color: var(--page1); }
+  .sym-p2 { color: var(--page2); }
+  .sym-p3 { color: var(--page3); }
+  .sym-p4 { color: var(--page4); }
+
+  .card-title-block { flex: 1; }
+  .card-num {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .card-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #e8edf8;
+    line-height: 1.2;
+  }
+  .card-tf {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .live-dot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--live);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .live-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--live);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* INDICATORS ROW */
+  .indicators-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ind-tag {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    color: #8899bb;
+    letter-spacing: 0.5px;
+  }
+
+  /* CONDITIONS */
+  .conditions {
+    padding: 10px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cond-label {
+    font-size: 9px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    color: var(--muted);
+  }
+
+  .cond-block {
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .cond-buy { background: rgba(0,230,118,0.06); border-left: 3px solid var(--buy); }
+  .cond-sell { background: rgba(255,23,68,0.06); border-left: 3px solid var(--sell); }
+  .cond-wait { background: rgba(255,171,0,0.06); border-left: 3px solid var(--wait); }
+
+  .cond-header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 5px;
+  }
+  .signal-badge {
+    font-size: 9px;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  .badge-buy { background: rgba(0,230,118,0.2); color: var(--buy); border: 1px solid var(--buy); }
+  .badge-sell { background: rgba(255,23,68,0.2); color: var(--sell); border: 1px solid var(--sell); }
+  .badge-wait { background: rgba(255,171,0,0.2); color: var(--wait); border: 1px solid var(--wait); }
+
+  .conf-pct {
+    font-size: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    margin-left: auto;
+  }
+  .conf-buy { color: var(--buy); }
+  .conf-sell { color: var(--sell); }
+  .conf-wait { color: var(--wait); }
+
+  .cond-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .cond-list li {
+    font-size: 11px;
+    color: #99aac8;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .cond-list li::before {
+    content: '›';
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .cond-list .hi { color: #c8d8f0; }
+
+  /* SL/TARGET ROW */
+  .sl-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .sl-box {
+    flex: 1;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    padding: 4px 7px;
+  }
+  .sl-label { font-size: 9px; color: var(--muted); font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; }
+  .sl-val { font-size: 11px; color: #c0d0e8; font-family: 'Share Tech Mono', monospace; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 0 14px; }
+
+  /* SCROLL TO TOP */
+  .toc {
+    padding: 14px 16px;
+    background: #080f1e;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .toc a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .toc a:hover { color: var(--accent-gold); border-color: var(--accent-gold); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-title">🔱 TRISHUL GREEK FLIP</div>
+  <div class="header-subtitle">16 STRATEGIES · FULL INDICATOR REFERENCE · BUY / SELL / WAIT CONDITIONS</div>
+  <div class="header-pills">
+    <span class="pill pill-p1">P1 · विधाता · EQUITY</span>
+    <span class="pill pill-p2">P2 · आशियाना · EQUITY</span>
+    <span class="pill pill-p3">P3 · उड़ान · INDEX</span>
+    <span class="pill pill-p4">P4 · परिंदा · INDEX</span>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="dot dot-buy"></div> BUY — खरीदो</div>
+  <div class="legend-item"><div class="dot dot-sell"></div> SELL — बेचो</div>
+  <div class="legend-item"><div class="dot dot-wait"></div> WAIT — रुको (कोई condition पूरी नहीं)</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <a href="#p1">P1 विधाता</a>
+  <a href="#p2">P2 आशियाना</a>
+  <a href="#p3">P3 उड़ान</a>
+  <a href="#p4">P4 परिंदा</a>
+</div>
+
+
+<!-- ════════════════════ PAGE 1: विधाता ════════════════════ -->
+<div class="page-section" id="p1">
+  <div class="page-header">
+    <span class="page-badge badge-p1">PAGE 1</span>
+    <span class="page-name page-name-p1">विधाता (Vidhata)</span>
+    <span class="page-type">EQUITY STOCKS · 4 STRATEGIES</span>
+  </div>
+
+  <!-- S1 -->
+  <div class="strategy-card" id="s1">
+    <div class="card-top">
+      <div class="greek-sym sym-p1">Δ</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 01 · VIDHATA</div>
+        <div class="card-name">DELTA FLIP · SuperTrend + SR Breakout</div>
+        <div class="card-tf">⏱ Timeframe: 5 MINUTE · Data: 7 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">SuperTrend (10, 3.0)</span>
+      <span class="ind-tag">Support/Resistance (20)</span>
+      <span class="ind-tag">Volume SMA (20)</span>
+      <span class="ind-tag">ATR Trailing Stop</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">82% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price > Resistance × 1.002</span> (resistance breakout confirmed)</li>
+          <li><span class="hi">SuperTrend Direction = 1</span> (UP trend)</li>
+          <li><span class="hi">Volume > Avg Volume × 1.3</span> (volume confirmation)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.5 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price + (Price − SL) × 2.5</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">82% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price &lt; Support × 0.998</span> (support breakdown)</li>
+          <li><span class="hi">SuperTrend Direction = -1</span> (DOWN trend)</li>
+          <li><span class="hi">Volume > Avg Volume × 1.3</span> (volume confirmation)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.5 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price − (SL − Price) × 2.5</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>कोई भी उपरोक्त condition पूरी नहीं — price range में है</li>
+          <li>Volume कम है या breakout confirm नहीं हुआ</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="strategy-card" id="s2">
+    <div class="card-top">
+      <div class="greek-sym sym-p1">Φ</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 02 · VIDHATA</div>
+        <div class="card-name">FIBONACCI FLIP · Fibonacci + Pivot Points</div>
+        <div class="card-tf">⏱ Timeframe: 15 MINUTE · Data: 10 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">Fibonacci Retracement</span>
+      <span class="ind-tag">Pivot Points (P, R1, S1)</span>
+      <span class="ind-tag">RSI (14)</span>
+      <span class="ind-tag">Volume SMA (20)</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">78% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price ≈ Fib 0.618</span> (±0.5% के अंदर)</li>
+          <li><span class="hi">Price > S1</span> (Pivot support के ऊपर)</li>
+          <li><span class="hi">RSI 40–60</span> (neutral zone — overextended नहीं)</li>
+          <li><span class="hi">Volume > Avg × 1.2</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">R1 (Pivot Resistance)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">78% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price ≈ Fib 0.382</span> (±0.5% के अंदर)</li>
+          <li><span class="hi">Price &lt; R1</span> (Pivot resistance के नीचे)</li>
+          <li><span class="hi">RSI 40–60</span></li>
+          <li><span class="hi">Volume > Avg × 1.2</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">S1 (Pivot Support)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>Price Fibonacci levels से दूर है</li>
+          <li>RSI &lt;40 या >60 (momentum extreme है)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="strategy-card" id="s3">
+    <div class="card-top">
+      <div class="greek-sym sym-p1">A</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 03 · VIDHATA</div>
+        <div class="card-name">ATR SURGE · ATR Breakout + Volume Profile</div>
+        <div class="card-tf">⏱ Timeframe: 1 MINUTE · Data: 3 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">ATR (14)</span>
+      <span class="ind-tag">Volume Profile (10 bins)</span>
+      <span class="ind-tag">SMA (20)</span>
+      <span class="ind-tag">POC / VAH / VAL</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">80% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price > POC</span> (Point of Control के ऊपर)</li>
+          <li><span class="hi">Price > SMA20</span></li>
+          <li><span class="hi">ATR > ATR[-5] × 1.3</span> (volatility expansion हो रही है)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">VAH (Value Area High)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">80% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price &lt; POC</span></li>
+          <li><span class="hi">Price &lt; SMA20</span></li>
+          <li><span class="hi">ATR > ATR[-5] × 1.3</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">VAL (Value Area Low)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>ATR expand नहीं हो रही — low volatility zone</li>
+          <li>Price POC के आसपास है — range-bound</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="strategy-card" id="s4">
+    <div class="card-top">
+      <div class="greek-sym sym-p1">K</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 04 · VIDHATA</div>
+        <div class="card-name">KAMA FORCE · KAMA + ADX + Support/Resistance</div>
+        <div class="card-tf">⏱ Timeframe: 5 MINUTE · Data: 7 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">KAMA (10, 2, 30)</span>
+      <span class="ind-tag">ADX (14)</span>
+      <span class="ind-tag">+DI / −DI</span>
+      <span class="ind-tag">Support/Resistance (20)</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">85% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">ADX > 25</span> (strong trend)</li>
+          <li><span class="hi">+DI > −DI</span> (bullish direction)</li>
+          <li><span class="hi">Price > KAMA</span> (adaptive MA support)</li>
+          <li><span class="hi">Price > Resistance × 0.995</span> (near breakout)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price + (Price − SL) × 3</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">85% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">ADX > 25</span></li>
+          <li><span class="hi">−DI > +DI</span> (bearish direction)</li>
+          <li><span class="hi">Price &lt; KAMA</span></li>
+          <li><span class="hi">Price &lt; Support × 1.005</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price − (SL − Price) × 3</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>ADX &lt; 25 — weak/choppy market</li>
+          <li>+DI और −DI बहुत पास हैं</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 2: आशियाना ════════════════════ -->
+<div class="page-section" id="p2">
+  <div class="page-header">
+    <span class="page-badge badge-p2">PAGE 2</span>
+    <span class="page-name page-name-p2">आशियाना (Aashiyana)</span>
+    <span class="page-type">EQUITY STOCKS · 4 STRATEGIES</span>
+  </div>
+
+  <!-- S5 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p2">B</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 05 · AASHIYANA</div>
+        <div class="card-name">BOLLINGER BURST · Bollinger Squeeze + Pivot</div>
+        <div class="card-tf">⏱ Timeframe: 15 MINUTE · Data: 10 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">Bollinger Bands (20, 2)</span>
+      <span class="ind-tag">Bandwidth Squeeze</span>
+      <span class="ind-tag">Pivot Points (R1, S1)</span>
+      <span class="ind-tag">Volume SMA (20)</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">79% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Bandwidth &lt; Avg Bandwidth × 0.8</span> (squeeze active)</li>
+          <li><span class="hi">Price > Upper Band</span> (ऊपर breakout)</li>
+          <li><span class="hi">Volume > Avg × 1.5</span> (strong volume)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.5 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">R1 (Pivot Resistance)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">79% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Bandwidth &lt; Avg Bandwidth × 0.8</span> (squeeze active)</li>
+          <li><span class="hi">Price &lt; Lower Band</span> (नीचे breakdown)</li>
+          <li><span class="hi">Volume > Avg × 1.5</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.5 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">S1 (Pivot Support)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>Squeeze है लेकिन breakout अभी नहीं हुआ</li>
+          <li>Volume कम है — false breakout का डर</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p2">V</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 06 · AASHIYANA</div>
+        <div class="card-name">VWAP SNAP · VWAP + Std Dev + Fibonacci</div>
+        <div class="card-tf">⏱ Timeframe: 1 MINUTE · Data: 3 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">VWAP</span>
+      <span class="ind-tag">VWAP ±2 Std Dev Bands</span>
+      <span class="ind-tag">Fibonacci 0.618</span>
+      <span class="ind-tag">Standard Deviation (30)</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">76% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price &lt; VWAP − 2×StdDev</span> (lower band के नीचे)</li>
+          <li><span class="hi">Price ≈ Fib 0.618</span> (±0.8% के अंदर)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">VWAP (mean reversion)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">76% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price > VWAP + 2×StdDev</span> (upper band के ऊपर)</li>
+          <li>Mean reversion trade — VWAP तक वापस आने की उम्मीद</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">VWAP (mean reversion)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>Price VWAP bands के अंदर है</li>
+          <li>Fibonacci level match नहीं कर रहा</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p2">S</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 07 · AASHIYANA</div>
+        <div class="card-name">STOCH FLIP · StochRSI + SR + Engulfing</div>
+        <div class="card-tf">⏱ Timeframe: 5 MINUTE · Data: 7 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">StochRSI K (14,3)</span>
+      <span class="ind-tag">StochRSI D (14,3)</span>
+      <span class="ind-tag">Support/Resistance (15)</span>
+      <span class="ind-tag">Engulfing Candle</span>
+      <span class="ind-tag">Volume SMA (20)</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">81% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">K crosses above D</span> (bullish crossover)</li>
+          <li><span class="hi">K &lt; 30</span> (oversold zone)</li>
+          <li><span class="hi">Bullish Engulfing candle</span> (पिछली candle को engulf करे)</li>
+          <li><span class="hi">Volume > Avg × 1.2</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Resistance Level</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">81% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">K crosses below D</span> (bearish crossover)</li>
+          <li><span class="hi">K > 70</span> (overbought zone)</li>
+          <li><span class="hi">Bearish Engulfing candle</span></li>
+          <li><span class="hi">Volume > Avg × 1.2</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Support Level</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>K और D का crossover नहीं हुआ</li>
+          <li>Engulfing pattern नहीं बना</li>
+          <li>StochRSI mid-zone (30–70) में है</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p2">M</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 08 · AASHIYANA</div>
+        <div class="card-name">MACD PIVOT · MACD + Pivot + Volume Profile</div>
+        <div class="card-tf">⏱ Timeframe: 15 MINUTE · Data: 10 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">MACD (12, 26, 9)</span>
+      <span class="ind-tag">MACD Signal Line</span>
+      <span class="ind-tag">MACD Histogram</span>
+      <span class="ind-tag">Pivot Points</span>
+      <span class="ind-tag">Volume Profile POC</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">77% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">MACD crosses above Signal</span> (bullish crossover)</li>
+          <li><span class="hi">MACD > 0</span> (positive territory में)</li>
+          <li><span class="hi">Price > POC</span> (Volume Profile के ऊपर)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">R1 (Pivot Resistance)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">77% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">MACD crosses below Signal</span> (bearish crossover)</li>
+          <li><span class="hi">MACD &lt; 0</span> (negative territory में)</li>
+          <li><span class="hi">Price &lt; POC</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">S1 (Pivot Support)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>MACD crossover नहीं हुआ</li>
+          <li>Price POC के बिल्कुल पास है</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 3: उड़ान ════════════════════ -->
+<div class="page-section" id="p3">
+  <div class="page-header">
+    <span class="page-badge badge-p3">PAGE 3</span>
+    <span class="page-name page-name-p3">उड़ान (Udaan)</span>
+    <span class="page-type">INDEX INTRADAY · 4 STRATEGIES</span>
+  </div>
+
+  <!-- S9 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p3">U</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 09 · UDAAN</div>
+        <div class="card-name">UDAAN THRUST · SuperTrend + ATR + Pivot</div>
+        <div class="card-tf">⏱ Timeframe: 1 MINUTE · Data: 2 Days · Nifty/BankNifty</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">SuperTrend (7, 2.5)</span>
+      <span class="ind-tag">ATR (10)</span>
+      <span class="ind-tag">Pivot Points (P, R1, S1)</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">84% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">SuperTrend Direction = UP (1)</span></li>
+          <li><span class="hi">Price > SuperTrend value</span></li>
+          <li><span class="hi">Price > Pivot (P)</span> (intraday bullish)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">SuperTrend − ATR × 1.5</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">R1 (Pivot Resistance)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">84% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">SuperTrend Direction = DOWN (-1)</span></li>
+          <li><span class="hi">Price &lt; SuperTrend value</span></li>
+          <li><span class="hi">Price &lt; Pivot (P)</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">SuperTrend + ATR × 1.5</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">S1 (Pivot Support)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>Price Pivot के पास है — direction unclear</li>
+          <li>SuperTrend flip हो रहा है</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S10 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p3">R</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 10 · UDAAN</div>
+        <div class="card-name">RSI REVERSAL · RSI + Support/Resistance + Volume</div>
+        <div class="card-tf">⏱ Timeframe: 1 MINUTE · Data: 2 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">RSI (7) — Fast</span>
+      <span class="ind-tag">Support/Resistance (15)</span>
+      <span class="ind-tag">Volume SMA (20)</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">79% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">RSI &lt; 30</span> (oversold)</li>
+          <li><span class="hi">Price ≤ Support × 1.005</span> (support के पास)</li>
+          <li><span class="hi">Volume > Avg × 1.3</span> (spike)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Support × 0.998</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Resistance Level</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">79% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">RSI > 70</span> (overbought)</li>
+          <li><span class="hi">Price ≥ Resistance × 0.995</span> (resistance के पास)</li>
+          <li><span class="hi">Volume > Avg × 1.3</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Resistance × 1.002</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Support Level</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>RSI 30–70 के बीच है</li>
+          <li>Price S/R levels से दूर है</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S11 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p3">W</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 11 · UDAAN</div>
+        <div class="card-name">VWAP BAND · VWAP + Bollinger + Fibonacci</div>
+        <div class="card-tf">⏱ Timeframe: 1 MINUTE · Data: 2 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">VWAP</span>
+      <span class="ind-tag">Bollinger Bands (20, 2)</span>
+      <span class="ind-tag">Fibonacci 0.5</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">75% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price &lt; Lower Bollinger Band</span></li>
+          <li><span class="hi">Price &lt; VWAP</span></li>
+          <li><span class="hi">Price ≈ Fib 0.50</span> (±0.3% के अंदर)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Lower BB × 0.998</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">VWAP (mean reversion)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">75% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price > Upper Bollinger Band</span></li>
+          <li><span class="hi">Price > VWAP</span></li>
+          <li><span class="hi">Price ≈ Fib 0.50</span> (±0.3%)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Upper BB × 1.002</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">VWAP (mean reversion)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>तीनों conditions एक साथ नहीं मिल रहीं</li>
+          <li>Price Bollinger Bands के अंदर है</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S12 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p3">★</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 12 · UDAAN · ⭐ STAR STRATEGY</div>
+        <div class="card-name">MULTI-TF CONFLUENCE · 1M + 5M + ATR</div>
+        <div class="card-tf">⏱ Timeframe: 1M + 5M दोनों · Data: 2–5 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">SuperTrend 1M (7, 2.5)</span>
+      <span class="ind-tag">RSI 5M (14)</span>
+      <span class="ind-tag">ATR 1M (10)</span>
+      <span class="ind-tag">Multi-Timeframe</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">90% Confidence ⭐ सबसे ज़्यादा</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">SuperTrend 1M = UP</span></li>
+          <li><span class="hi">RSI 5M > 50</span> (higher timeframe bullish)</li>
+          <li><span class="hi">ATR expanding</span> — ATR > ATR[-5] × 1.2</li>
+          <li>सभी 3 timeframes एक साथ agree करें = Confluence</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">SuperTrend 1M − ATR × 1.5</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price + (Price − SL) × 3</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">90% Confidence ⭐</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">SuperTrend 1M = DOWN</span></li>
+          <li><span class="hi">RSI 5M &lt; 50</span></li>
+          <li><span class="hi">ATR expanding</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">SuperTrend 1M + ATR × 1.5</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price − (SL − Price) × 3</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>1M और 5M conflict में हैं</li>
+          <li>ATR expand नहीं हो रही — low momentum</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 4: परिंदा ════════════════════ -->
+<div class="page-section" id="p4">
+  <div class="page-header">
+    <span class="page-badge badge-p4">PAGE 4</span>
+    <span class="page-name page-name-p4">परिंदा (Parinda)</span>
+    <span class="page-type">INDEX INTRADAY · 4 STRATEGIES</span>
+  </div>
+
+  <!-- S13 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p4">I</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 13 · PARINDA</div>
+        <div class="card-name">ICHIMOKU CLOUD · Ichimoku + Volume Profile + Pivot</div>
+        <div class="card-tf">⏱ Timeframe: 5 MINUTE · Data: 5 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">Tenkan-sen (9)</span>
+      <span class="ind-tag">Kijun-sen (26)</span>
+      <span class="ind-tag">Kumo Cloud (Senkou A+B)</span>
+      <span class="ind-tag">Volume Profile POC</span>
+      <span class="ind-tag">Pivot Points</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">86% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price > Cloud Top</span> (Kumo के ऊपर — bullish)</li>
+          <li><span class="hi">Tenkan > Kijun</span> (TK cross bullish)</li>
+          <li><span class="hi">Price > POC</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Cloud Bottom (Kumo नीचे)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">R1 (Pivot Resistance)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">86% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Price &lt; Cloud Bottom</span> (Kumo के नीचे — bearish)</li>
+          <li><span class="hi">Tenkan &lt; Kijun</span></li>
+          <li><span class="hi">Price &lt; POC</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Cloud Top (Kumo ऊपर)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">S1 (Pivot Support)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>Price Cloud के अंदर है (uncertainty zone)</li>
+          <li>Tenkan और Kijun बहुत पास हैं</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S14 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p4">K</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 14 · PARINDA</div>
+        <div class="card-name">KAMA FIB · KAMA + ADX + Fibonacci</div>
+        <div class="card-tf">⏱ Timeframe: 1 MINUTE · Data: 3 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">KAMA (10, 2, 30)</span>
+      <span class="ind-tag">ADX (14)</span>
+      <span class="ind-tag">+DI / −DI</span>
+      <span class="ind-tag">Fibonacci 0.618 / 0.382</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">83% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">ADX > 25</span></li>
+          <li><span class="hi">+DI > −DI</span></li>
+          <li><span class="hi">Price > KAMA</span></li>
+          <li><span class="hi">Price > Fib 0.618</span> (strong level break)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Long)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Fib 0.0 (swing high)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">83% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">ADX > 25</span></li>
+          <li><span class="hi">−DI > +DI</span></li>
+          <li><span class="hi">Price &lt; KAMA</span></li>
+          <li><span class="hi">Price &lt; Fib 0.382</span></li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">ATR Trailing × 2.0 (Short)</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Fib 1.0 (swing low)</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>ADX &lt; 25 — sideways market</li>
+          <li>Price KAMA और Fib के बीच है</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S15 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p4">S</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 15 · PARINDA</div>
+        <div class="card-name">SMC ORDER BLOCK · OB + FVG + ATR</div>
+        <div class="card-tf">⏱ Timeframe: 5 MINUTE · Data: 5 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">Order Blocks (Bullish/Bearish)</span>
+      <span class="ind-tag">Fair Value Gap (FVG)</span>
+      <span class="ind-tag">ATR (14)</span>
+      <span class="ind-tag">SMC Concepts</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">87% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Bullish Order Block मिला</span> (recent)</li>
+          <li><span class="hi">Price ≈ OB Low</span> (±0.3%) — retest हो रहा है</li>
+          <li><span class="hi">Bullish FVG</span> भी OB के ऊपर है</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">OB Low − ATR</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price + (Price − SL) × 2.5</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">87% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Bearish Order Block मिला</span></li>
+          <li><span class="hi">Price ≈ OB High</span> (±0.3%) — retest</li>
+          <li><span class="hi">Bearish FVG</span> OB के नीचे है</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">OB High + ATR</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Price − (SL − Price) × 2.5</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>कोई Order Block नहीं मिला</li>
+          <li>OB और FVG एक साथ align नहीं हैं</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S16 -->
+  <div class="strategy-card">
+    <div class="card-top">
+      <div class="greek-sym sym-p4">L</div>
+      <div class="card-title-block">
+        <div class="card-num">STRATEGY 16 · PARINDA</div>
+        <div class="card-name">LIQUIDITY SWEEP · Liq Sweep + Fibonacci + Volume</div>
+        <div class="card-tf">⏱ Timeframe: 1 MINUTE · Data: 3 Days</div>
+      </div>
+      <div class="live-dot">LIVE</div>
+    </div>
+    <div class="indicators-row">
+      <span class="ind-tag">Swing Highs / Lows</span>
+      <span class="ind-tag">Fibonacci 0.618 / 0.382</span>
+      <span class="ind-tag">Volume SMA (20)</span>
+      <span class="ind-tag">Liquidity Sweep Pattern</span>
+    </div>
+    <div class="conditions">
+      <div class="cond-block cond-buy">
+        <div class="cond-header">
+          <span class="signal-badge badge-buy">✦ BUY</span>
+          <span class="conf-pct conf-buy">88% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Candle Low &lt; Recent Swing Low</span> (liquidity sweep नीचे)</li>
+          <li><span class="hi">Price reverses back above Swing Low</span> (false break)</li>
+          <li><span class="hi">Volume > Avg × 1.5</span> (spike on sweep)</li>
+          <li><span class="hi">Price ≈ Fib 0.618</span> (±0.5%)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Swing Low × 0.999</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Recent Swing High × 0.998</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-sell">
+        <div class="cond-header">
+          <span class="signal-badge badge-sell">▼ SELL</span>
+          <span class="conf-pct conf-sell">88% Confidence</span>
+        </div>
+        <ul class="cond-list">
+          <li><span class="hi">Candle High > Recent Swing High</span> (liquidity sweep ऊपर)</li>
+          <li><span class="hi">Price reverses back below Swing High</span></li>
+          <li><span class="hi">Volume > Avg × 1.5</span></li>
+          <li><span class="hi">Price ≈ Fib 0.382</span> (±0.5%)</li>
+        </ul>
+        <div class="sl-row">
+          <div class="sl-box"><div class="sl-label">STOP LOSS</div><div class="sl-val">Swing High × 1.001</div></div>
+          <div class="sl-box"><div class="sl-label">TARGET</div><div class="sl-val">Recent Swing Low × 1.002</div></div>
+        </div>
+      </div>
+      <div class="cond-block cond-wait">
+        <div class="cond-header"><span class="signal-badge badge-wait">◌ WAIT</span></div>
+        <ul class="cond-list">
+          <li>Swing highs/lows नहीं मिले</li>
+          <li>Sweep हुआ लेकिन reversal confirm नहीं</li>
+          <li>Volume कम है</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="text-align:center; padding: 24px 16px; color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 10px; border-top: 1px solid var(--border); letter-spacing: 1px;">
+  🔱 TRISHUL GREEK FLIP · 16 STRATEGIES · ANGEL ONE SMARTAPI · NSE EQUITY + INDEX INTRADAY
+  <br><br>
+  ⚠️ यह केवल educational reference है। ट्रेडिंग में नुकसान हो सकता है। अपने विवेक से निर्णय लें।
+</div>
+
+</body>
+</html>

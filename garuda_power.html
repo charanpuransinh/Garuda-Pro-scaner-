@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>गरुड़ पावर — GARUDA POWER</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808;--bg1:#0f0f0f;--bg2:#141414;--bg3:#1a1a1a;
+  --gold:#FFD700;--gold2:#FFA500;
+  --green:#00E676;--green2:#00C853;
+  --red:#FF1744;--red2:#D50000;
+  --orange:#FF9100;--purple:#AA00FF;
+  --blue:#2979FF;--cyan:#00E5FF;
+  --text:#F0F0F0;--dim:#555;--dim2:#333;
+  --border:#1c1c1c;--border2:#2a2a2a;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px;background:#0b0b0b;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200
+}
+.logo-wrap{display:flex;flex-direction:column;line-height:1}
+.logo{font-family:'Bebas Neue';font-size:24px;color:var(--gold);letter-spacing:4px}
+.logo-sub{font-family:'JetBrains Mono';font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:-2px}
+.status{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono';font-size:10px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 4px var(--green)}50%{opacity:.2;box-shadow:none}}
+.clk-val{color:var(--gold);font-size:12px;font-weight:700}
+.sess-label{color:var(--orange);font-size:9px}
+
+/* ── MODE TABS ── */
+.modebar{
+  display:grid;grid-template-columns:1fr 1fr;
+  background:#0b0b0b;border-bottom:2px solid var(--border2)
+}
+.modebt{
+  font-family:'Bebas Neue';font-size:22px;letter-spacing:3px;
+  padding:12px 0;text-align:center;
+  background:transparent;color:var(--dim);border:none;cursor:pointer;
+  border-bottom:3px solid transparent;transition:.25s;position:relative
+}
+.modebt .mcnt{
+  font-family:'JetBrains Mono';font-size:10px;
+  position:absolute;top:8px;right:20px;
+  padding:1px 5px;border-radius:10px;
+  background:var(--bg3);color:var(--dim)
+}
+.modebt.active{color:var(--gold);border-bottom-color:var(--gold)}
+.modebt.active .mcnt{background:rgba(255,215,0,.15);color:var(--gold)}
+
+/* ── GLOBAL GREEKS BAR ── */
+.gbar{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:4px;
+  padding:8px 12px;background:linear-gradient(180deg,#0d0d0d,var(--bg));
+  border-bottom:1px solid var(--border)
+}
+.gpill{background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:5px 4px;text-align:center}
+.gl{font-family:'JetBrains Mono';font-size:7px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.gv{font-family:'JetBrains Mono';font-size:12px;font-weight:700;margin-top:1px}
+.gup{color:var(--green)}.gdn{color:var(--red)}.gne{color:var(--orange)}
+
+/* ── SECONDARY BAR ── */
+.sbar{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;
+  padding:5px 12px 8px;border-bottom:1px solid var(--border)
+}
+.spill{background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:4px 5px;text-align:center}
+.sl{font-family:'JetBrains Mono';font-size:7px;color:var(--dim);text-transform:uppercase}
+.sv{font-family:'JetBrains Mono';font-size:11px;font-weight:600;margin-top:1px}
+
+/* ── SESSION TIMING ── */
+.sessbar{
+  display:flex;gap:4px;padding:6px 12px;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none
+}
+.sessbar::-webkit-scrollbar{display:none}
+.sp{
+  font-family:'JetBrains Mono';font-size:8px;white-space:nowrap;
+  padding:3px 8px;border-radius:3px;border:1px solid var(--border);color:var(--dim)
+}
+.sp.hot{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.3);color:var(--green);box-shadow:0 0 5px rgba(0,230,118,.15)}
+.sp.warm{background:rgba(255,145,0,.1);border-color:rgba(255,145,0,.3);color:var(--orange)}
+.sp.cold{background:rgba(255,23,68,.04);border-color:rgba(255,23,68,.1);color:var(--red2)}
+
+/* ── PAGE ── */
+.page{display:none;padding:10px 12px 80px}
+.page.active{display:block}
+.ptitle{font-family:'Bebas Neue';font-size:20px;letter-spacing:2px;color:var(--gold);margin-bottom:1px}
+.psub{font-size:11px;color:var(--dim);margin-bottom:12px}
+
+/* ── SCANNER GRID (2x2) ── */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* ── SCANNER CARD ── */
+.scard{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;cursor:pointer;
+  transition:.2s;position:relative
+}
+.scard:hover{border-color:var(--border2);background:var(--bg2)}
+.scard::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--gold2));opacity:.15
+}
+.scard.hot::after{opacity:1;box-shadow:0 0 10px var(--gold2)}
+.scard.green-top::after{background:linear-gradient(90deg,var(--green),var(--green2));opacity:1}
+.scard.red-top::after{background:linear-gradient(90deg,var(--red),var(--red2));opacity:1}
+.scard.purple-top::after{background:linear-gradient(90deg,var(--purple),#7B00D4);opacity:1}
+
+/* Card inner */
+.cinner{padding:10px}
+.chead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.cnum{font-family:'JetBrains Mono';font-size:9px;color:var(--dim)}
+.ctag{font-family:'JetBrains Mono';font-size:8px;padding:2px 6px;border-radius:3px;text-transform:uppercase}
+.tag-s{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.tag-e{background:rgba(255,145,0,.1);color:var(--orange);border:1px solid rgba(255,145,0,.2)}
+.tag-h{background:rgba(170,0,255,.1);color:var(--purple);border:1px solid rgba(170,0,255,.2)}
+
+.cname{font-family:'Bebas Neue';font-size:13px;letter-spacing:.5px;color:var(--text);margin-bottom:2px;line-height:1.1}
+.cindex{font-family:'JetBrains Mono';font-size:9px;color:var(--dim);margin-bottom:8px}
+
+/* Signal pill */
+.csig{
+  padding:5px 8px;border-radius:4px;margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.08)
+}
+.csig-txt{font-family:'Bebas Neue';font-size:13px;letter-spacing:.5px}
+.csig-sc{font-family:'JetBrains Mono';font-size:12px;font-weight:700}
+.sig-ult{color:var(--green);text-shadow:0 0 8px rgba(0,230,118,.5)}
+.sig-str{color:var(--green2)}
+.sig-mod{color:var(--orange)}
+.sig-wait{color:var(--dim)}
+.sig-sell{color:var(--red)}
+
+/* Mini row */
+.cmini{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:8px}
+.cmt{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:3px;padding:3px 4px;text-align:center}
+.cml{font-family:'JetBrains Mono';font-size:6px;color:var(--dim);text-transform:uppercase}
+.cmv{font-family:'JetBrains Mono';font-size:9px;font-weight:600;margin-top:1px}
+
+/* Trade row */
+.ctrade{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;border-top:1px solid var(--border);padding-top:6px}
+.ctr{text-align:center}
+.ctl{font-family:'JetBrains Mono';font-size:6px;color:var(--dim);text-transform:uppercase}
+.ctv{font-family:'JetBrains Mono';font-size:10px;font-weight:700;margin-top:1px}
+
+/* Tap hint */
+.tap-hint{
+  text-align:center;padding:4px;
+  font-family:'JetBrains Mono';font-size:7px;color:var(--dim2);
+  border-top:1px solid var(--border)
+}
+
+/* ── MODAL OVERLAY ── */
+.modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.92);z-index:500;
+  overflow-y:auto;padding:16px 12px
+}
+.modal-bg.open{display:block;animation:mfade .2s}
+@keyframes mfade{from{opacity:0}to{opacity:1}}
+
+.modal{
+  background:#0e0e0e;border:1px solid var(--border2);
+  border-radius:10px;max-width:480px;margin:0 auto;
+  position:relative;overflow:hidden
+}
+.modal::before{
+  content:'';display:block;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold2),var(--green))
+}
+.mclose{
+  position:absolute;top:10px;right:12px;
+  background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);font-size:16px;width:28px;height:28px;
+  border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono';z-index:10
+}
+.mclose:hover{background:var(--red);color:#fff}
+
+.mhead{padding:14px 16px 10px}
+.m-scanner-no{font-family:'JetBrains Mono';font-size:10px;color:var(--dim);margin-bottom:2px}
+.m-name{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;color:var(--gold)}
+.m-index{font-family:'JetBrains Mono';font-size:11px;color:var(--dim);margin-top:2px}
+
+.msec{padding:10px 16px;border-top:1px solid var(--border)}
+.msec-title{font-family:'JetBrains Mono';font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+
+/* Modal signal */
+.m-sig{
+  padding:10px 14px;border-radius:6px;margin-bottom:4px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.15)
+}
+.m-sig-txt{font-family:'Bebas Neue';font-size:20px;letter-spacing:1px}
+.m-sig-sc{font-family:'JetBrains Mono';font-size:18px;font-weight:700}
+
+/* Modal greeks grid */
+.mgrid4{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.mgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.mpill{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:6px 8px;text-align:center}
+.mplab{font-family:'JetBrains Mono';font-size:8px;color:var(--dim);text-transform:uppercase}
+.mpval{font-family:'JetBrains Mono';font-size:13px;font-weight:700;margin-top:2px}
+
+/* Modal trade params */
+.mentry-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.mentr{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:8px;text-align:center}
+.mpl{font-family:'JetBrains Mono';font-size:8px;color:var(--dim);text-transform:uppercase}
+.mpv{font-family:'JetBrains Mono';font-size:15px;font-weight:700;margin-top:3px}
+
+/* Trail bar */
+.trail{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;background:rgba(255,23,68,.05);
+  border:1px solid rgba(255,23,68,.12);border-radius:5px;margin-top:8px
+}
+.trl{font-family:'JetBrains Mono';font-size:8px;color:var(--red);text-transform:uppercase}
+.trv{font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:var(--red)}
+.trbtn{
+  font-family:'JetBrains Mono';font-size:9px;padding:4px 10px;
+  background:var(--red);color:#fff;border:none;border-radius:3px;cursor:pointer
+}
+
+/* Logic section */
+.logic-box{
+  background:rgba(255,215,0,.03);border:1px solid rgba(255,215,0,.08);
+  border-radius:5px;padding:10px 12px
+}
+.logic-item{
+  display:flex;align-items:flex-start;gap:8px;margin-bottom:6px
+}
+.logic-item:last-child{margin-bottom:0}
+.logic-icon{font-size:10px;margin-top:1px;flex-shrink:0}
+.logic-txt{font-family:'JetBrains Mono';font-size:10px;color:#aaa;line-height:1.5}
+
+/* Hedge layout */
+.hedge-sides{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.hside{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:8px;text-align:center}
+.hside-label{font-family:'JetBrains Mono';font-size:8px;color:var(--purple);text-transform:uppercase;letter-spacing:1px}
+.hside-strike{font-family:'JetBrains Mono';font-size:14px;font-weight:700;margin:4px 0}
+.hside-lots{font-family:'JetBrains Mono';font-size:10px;color:var(--dim)}
+.hside-status{font-family:'JetBrains Mono';font-size:9px;padding:2px 6px;border-radius:3px;display:inline-block;margin-top:4px}
+.hs-open{background:rgba(0,230,118,.15);color:var(--green)}
+.hs-close{background:rgba(255,23,68,.15);color:var(--red)}
+
+/* Footer */
+.foot{
+  text-align:center;padding:10px;border-top:1px solid var(--border);
+  font-family:'JetBrains Mono';font-size:9px;color:var(--dim2);margin-top:4px
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<div class="hdr">
+  <div class="logo-wrap">
+    <div class="logo">गरुड़ पावर</div>
+    <div class="logo-sub">// GARUDA POWER · OPTIONS SCANNER</div>
+  </div>
+  <div class="status">
+    <div class="live-dot"></div>
+    <div class="clk-val" id="clk">--:--:--</div>
+    <div style="color:var(--border2)">|</div>
+    <div class="sess-label" id="sess-label">LOADING</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODE TABS
+══════════════════════════════════════ -->
+<div class="modebar">
+  <button class="modebt active" id="tab-karuna" onclick="goMode('karuna')">
+    करुणा
+    <span class="mcnt">4 SCALP</span>
+  </button>
+  <button class="modebt" id="tab-sagar" onclick="goMode('sagar')">
+    सागर
+    <span class="mcnt">4 EXPIRY</span>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════
+     GLOBAL GREEKS BAR
+══════════════════════════════════════ -->
+<div class="gbar">
+  <div class="gpill"><div class="gl">Delta</div><div class="gv gup" id="g-delta">+0.52</div></div>
+  <div class="gpill"><div class="gl">Gamma</div><div class="gv gup" id="g-gamma">0.032</div></div>
+  <div class="gpill"><div class="gl">Vega</div><div class="gv gdn" id="g-vega">-0.18</div></div>
+  <div class="gpill"><div class="gl">Theta</div><div class="gv gdn" id="g-theta">-1.24</div></div>
+  <div class="gpill"><div class="gl">Vanna</div><div class="gv gne" id="g-vanna">+0.08</div></div>
+  <div class="gpill"><div class="gl">Charm</div><div class="gv gne" id="g-charm">-0.04</div></div>
+  <div class="gpill"><div class="gl">IV</div><div class="gv gup" id="g-iv">14.2%</div></div>
+  <div class="gpill"><div class="gl">Volume</div><div class="gv gup" id="g-vol">2.4M</div></div>
+  <div class="gpill"><div class="gl">OI Chg</div><div class="gv gup" id="g-oi">+12.5K</div></div>
+  <div class="gpill"><div class="gl">VWAP</div><div class="gv gne" id="g-vwap">22,847</div></div>
+  <div class="gpill"><div class="gl">PCR</div><div class="gv gdn" id="g-pcr">0.82</div></div>
+  <div class="gpill"><div class="gl">MaxPain</div><div class="gv gne" id="g-mp">22,800</div></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SECONDARY BAR
+══════════════════════════════════════ -->
+<div class="sbar">
+  <div class="spill"><div class="sl">9 EMA</div><div class="sv" style="color:var(--green)">22,834 ▲</div></div>
+  <div class="spill"><div class="sl">VWAP</div><div class="sv" style="color:var(--gold)">22,847</div></div>
+  <div class="spill"><div class="sl">Volume</div><div class="sv" style="color:var(--green)">2.4M ↑</div></div>
+  <div class="spill"><div class="sl">ADX</div><div class="sv" style="color:var(--orange)">28.4</div></div>
+  <div class="spill"><div class="sl">ATR</div><div class="sv" style="color:var(--red)">42.6</div></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SESSION BAR
+══════════════════════════════════════ -->
+<div class="sessbar">
+  <div class="sp hot" id="t1">09:15-09:45 KILLZONE</div>
+  <div class="sp warm" id="t2">09:45-10:30 MOMENTUM</div>
+  <div class="sp cold" id="t3">10:30-11:30 COOLING</div>
+  <div class="sp cold" id="t4">11:30-13:30 DEADZONE</div>
+  <div class="sp warm" id="t5">13:30-14:30 REVIVAL</div>
+  <div class="sp hot" id="t6">14:30-15:15 POWER HOUR</div>
+  <div class="sp hot" id="t7">15:15-15:30 EXPIRY BLAST</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     KARUNA PAGE — 4 INDEPENDENT SCALPERS
+══════════════════════════════════════ -->
+<div id="page-karuna" class="page active">
+  <div class="ptitle">करुणा — 4 SCALPER</div>
+  <div class="psub">Nifty50 · BankNifty · FinNifty · Sensex — प्रत्येक scanner स्वतंत्र · कोई interference नहीं</div>
+
+  <div class="sgrid">
+
+    <!-- ── K1: NIFTY 50 ── -->
+    <div class="scard hot green-top" onclick="openModal('k1')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">K-1</span>
+          <span class="ctag tag-s">SCALP</span>
+        </div>
+        <div class="cname">NIFTY 50</div>
+        <div class="cindex">NSE · Weekly · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-ult">ULTRA BUY</span>
+          <span class="csig-sc sig-ult">92</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">Delta</div><div class="cmv" style="color:var(--green)">+0.58</div></div>
+          <div class="cmt"><div class="cml">Gamma</div><div class="cmv" style="color:var(--green)">0.041</div></div>
+          <div class="cmt"><div class="cml">IV</div><div class="cmv" style="color:var(--orange)">13.8%</div></div>
+          <div class="cmt"><div class="cml">OI</div><div class="cmv" style="color:var(--green)">+8.2K</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--green)">0.72</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--green)">34.2</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Entry</div><div class="ctv" style="color:var(--gold)">22,856</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--red)">22,814</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--green)">22,920</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+    <!-- ── K2: BANKNIFTY ── -->
+    <div class="scard" onclick="openModal('k2')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">K-2</span>
+          <span class="ctag tag-s">SCALP</span>
+        </div>
+        <div class="cname">BANKNIFTY</div>
+        <div class="cindex">NSE · Weekly · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-str">STRONG BUY</span>
+          <span class="csig-sc sig-str">71</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">Delta</div><div class="cmv" style="color:var(--green)">+0.44</div></div>
+          <div class="cmt"><div class="cml">Gamma</div><div class="cmv" style="color:var(--green)">0.028</div></div>
+          <div class="cmt"><div class="cml">IV</div><div class="cmv" style="color:var(--orange)">16.4%</div></div>
+          <div class="cmt"><div class="cml">OI</div><div class="cmv" style="color:var(--green)">+5.1K</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--red)">1.12</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--orange)">26.8</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Entry</div><div class="ctv" style="color:var(--gold)">48,920</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--red)">48,820</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--green)">49,080</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+    <!-- ── K3: FINNIFTY ── -->
+    <div class="scard" onclick="openModal('k3')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">K-3</span>
+          <span class="ctag tag-s">SCALP</span>
+        </div>
+        <div class="cname">FINNIFTY</div>
+        <div class="cindex">NSE · Weekly · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-mod">MODERATE BUY</span>
+          <span class="csig-sc sig-mod">63</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">Delta</div><div class="cmv" style="color:var(--green)">+0.38</div></div>
+          <div class="cmt"><div class="cml">Gamma</div><div class="cmv" style="color:var(--orange)">0.019</div></div>
+          <div class="cmt"><div class="cml">IV</div><div class="cmv" style="color:var(--red)">18.2%</div></div>
+          <div class="cmt"><div class="cml">OI</div><div class="cmv" style="color:var(--red)">-2.4K</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--red)">1.28</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--orange)">22.1</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Entry</div><div class="ctv" style="color:var(--gold)">24,150</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--red)">24,080</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--green)">24,240</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+    <!-- ── K4: SENSEX ── -->
+    <div class="scard red-top" onclick="openModal('k4')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">K-4</span>
+          <span class="ctag tag-s">SCALP</span>
+        </div>
+        <div class="cname">SENSEX</div>
+        <div class="cindex">BSE · Weekly · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-wait">WAIT</span>
+          <span class="csig-sc sig-wait">48</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">Delta</div><div class="cmv" style="color:var(--red)">-0.12</div></div>
+          <div class="cmt"><div class="cml">Gamma</div><div class="cmv" style="color:var(--orange)">0.015</div></div>
+          <div class="cmt"><div class="cml">IV</div><div class="cmv" style="color:var(--red)">12.1%</div></div>
+          <div class="cmt"><div class="cml">OI</div><div class="cmv" style="color:var(--red)">-4.8K</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--green)">0.68</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--red)">18.4</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Entry</div><div class="ctv" style="color:var(--dim)">—</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--dim)">—</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--dim)">—</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+  </div><!-- /sgrid -->
+  <div class="foot">GARUDA POWER · करुणा MODE · 4 INDEPENDENT SCALPERS · DATA SIMULATED</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SAGAR PAGE — 4 INDEPENDENT EXPIRY
+══════════════════════════════════════ -->
+<div id="page-sagar" class="page">
+  <div class="ptitle">सागर — 4 EXPIRY</div>
+  <div class="psub">Nifty Weekly · BankNifty Weekly · Nifty Monthly · BankNifty Monthly — प्रत्येक scanner स्वतंत्र</div>
+
+  <div class="sgrid">
+
+    <!-- ── S1: NIFTY WEEKLY ── -->
+    <div class="scard hot green-top" onclick="openModal('s1')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">S-1</span>
+          <span class="ctag tag-e">EXPIRY</span>
+        </div>
+        <div class="cname">NIFTY WEEKLY</div>
+        <div class="cindex">NSE · Thu Expiry · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-ult">ULTRA STRONG+</span>
+          <span class="csig-sc sig-ult">96</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">MaxPain</div><div class="cmv" style="color:var(--gold)">22,800</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--green)">0.64</div></div>
+          <div class="cmt"><div class="cml">Theta</div><div class="cmv" style="color:var(--red)">-2.84</div></div>
+          <div class="cmt"><div class="cml">Vanna</div><div class="cmv" style="color:var(--green)">+0.14</div></div>
+          <div class="cmt"><div class="cml">Charm</div><div class="cmv" style="color:var(--red)">-0.08</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--green)">38.6</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Strike</div><div class="ctv" style="color:var(--gold)">22800CE</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--red)">22,750</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--green)">22,950</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+    <!-- ── S2: BANKNIFTY WEEKLY ── -->
+    <div class="scard" onclick="openModal('s2')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">S-2</span>
+          <span class="ctag tag-e">EXPIRY</span>
+        </div>
+        <div class="cname">BANKNIFTY WKL</div>
+        <div class="cindex">NSE · Wed Expiry · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-str">STRONG BUY</span>
+          <span class="csig-sc sig-str">74</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">MaxPain</div><div class="cmv" style="color:var(--gold)">48,900</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--green)">0.78</div></div>
+          <div class="cmt"><div class="cml">Theta</div><div class="cmv" style="color:var(--red)">-3.12</div></div>
+          <div class="cmt"><div class="cml">Vanna</div><div class="cmv" style="color:var(--green)">+0.09</div></div>
+          <div class="cmt"><div class="cml">Charm</div><div class="cmv" style="color:var(--red)">-0.05</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--orange)">29.4</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Strike</div><div class="ctv" style="color:var(--gold)">49000CE</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--red)">48,850</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--green)">49,200</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+    <!-- ── S3: NIFTY MONTHLY ── -->
+    <div class="scard" onclick="openModal('s3')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">S-3</span>
+          <span class="ctag tag-e">EXPIRY</span>
+        </div>
+        <div class="cname">NIFTY MONTHLY</div>
+        <div class="cindex">NSE · Last Thu · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-mod">MODERATE BUY</span>
+          <span class="csig-sc sig-mod">67</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">MaxPain</div><div class="cmv" style="color:var(--gold)">23,000</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--orange)">0.94</div></div>
+          <div class="cmt"><div class="cml">Theta</div><div class="cmv" style="color:var(--red)">-1.42</div></div>
+          <div class="cmt"><div class="cml">Vanna</div><div class="cmv" style="color:var(--orange)">+0.06</div></div>
+          <div class="cmt"><div class="cml">Charm</div><div class="cmv" style="color:var(--red)">-0.03</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--orange)">24.7</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Strike</div><div class="ctv" style="color:var(--gold)">23000CE</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--red)">22,920</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--green)">23,150</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+    <!-- ── S4: BANKNIFTY MONTHLY ── -->
+    <div class="scard red-top" onclick="openModal('s4')">
+      <div class="cinner">
+        <div class="chead">
+          <span class="cnum">S-4</span>
+          <span class="ctag tag-e">EXPIRY</span>
+        </div>
+        <div class="cname">BANKNIFTY MTH</div>
+        <div class="cindex">NSE · Last Wed · CE/PE</div>
+        <div class="csig">
+          <span class="csig-txt sig-wait">WAIT — LOW VOL</span>
+          <span class="csig-sc sig-wait">52</span>
+        </div>
+        <div class="cmini">
+          <div class="cmt"><div class="cml">MaxPain</div><div class="cmv" style="color:var(--gold)">49,200</div></div>
+          <div class="cmt"><div class="cml">PCR</div><div class="cmv" style="color:var(--red)">1.18</div></div>
+          <div class="cmt"><div class="cml">Theta</div><div class="cmv" style="color:var(--red)">-1.08</div></div>
+          <div class="cmt"><div class="cml">Vanna</div><div class="cmv" style="color:var(--orange)">-0.02</div></div>
+          <div class="cmt"><div class="cml">Charm</div><div class="cmv" style="color:var(--red)">-0.04</div></div>
+          <div class="cmt"><div class="cml">ADX</div><div class="cmv" style="color:var(--red)">19.2</div></div>
+        </div>
+        <div class="ctrade">
+          <div class="ctr"><div class="ctl">Strike</div><div class="ctv" style="color:var(--dim)">—</div></div>
+          <div class="ctr"><div class="ctl">SL</div><div class="ctv" style="color:var(--dim)">—</div></div>
+          <div class="ctr"><div class="ctl">Target</div><div class="ctv" style="color:var(--dim)">—</div></div>
+        </div>
+      </div>
+      <div class="tap-hint">▼ TAP FOR FULL DETAIL</div>
+    </div>
+
+  </div><!-- /sgrid -->
+  <div class="foot">GARUDA POWER · सागर MODE · 4 INDEPENDENT EXPIRY SCANNERS · DATA SIMULATED</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL OVERLAY
+══════════════════════════════════════ -->
+<div class="modal-bg" id="modal-bg" onclick="bgClick(event)">
+  <div class="modal" id="modal-box">
+    <button class="mclose" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+/* ── CLOCK & SESSION ── */
+const sessions=[
+  {start:'09:15',end:'09:45',label:'OPENING KILLZONE',cls:'hot',id:'t1'},
+  {start:'09:45',end:'10:30',label:'MOMENTUM PHASE',cls:'warm',id:'t2'},
+  {start:'10:30',end:'11:30',label:'COOLING ZONE',cls:'cold',id:'t3'},
+  {start:'11:30',end:'13:30',label:'DEAD ZONE',cls:'cold',id:'t4'},
+  {start:'13:30',end:'14:30',label:'REVIVAL ZONE',cls:'warm',id:'t5'},
+  {start:'14:30',end:'15:15',label:'POWER HOUR',cls:'hot',id:'t6'},
+  {start:'15:15',end:'15:30',label:'EXPIRY BLAST',cls:'hot',id:'t7'},
+];
+function toMin(s){const[h,m]=s.split(':').map(Number);return h*60+m}
+function tickClock(){
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const ss=String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clk').textContent=`${hh}:${mm}:${ss}`;
+  const cur=now.getHours()*60+now.getMinutes();
+  let found=false;
+  sessions.forEach(s=>{
+    const el=document.getElementById(s.id);
+    el.className='sp '+s.cls;
+    if(!found&&cur>=toMin(s.start)&&cur<toMin(s.end)){
+      el.classList.add('hot');
+      document.getElementById('sess-label').textContent=s.label;
+      found=true;
+    }
+  });
+  if(!found) document.getElementById('sess-label').textContent='MARKET CLOSED';
+}
+setInterval(tickClock,1000);tickClock();
+
+/* ── MODE SWITCH ── */
+function goMode(mode){
+  ['karuna','sagar'].forEach(m=>{
+    document.getElementById('page-'+m).classList.toggle('active',m===mode);
+    document.getElementById('tab-'+m).classList.toggle('active',m===mode);
+  });
+}
+
+/* ── MODAL DATA ── */
+const MODALS={
+  k1:{
+    no:'K-1',name:'NIFTY 50 SCALPER',index:'NSE · ATM Weekly Options · CE & PE',
+    tag:'SCALP',tagCls:'tag-s',
+    sig:'ULTRA STRONG BUY',sigCls:'sig-ult',score:'92/100',
+    greek:[
+      {l:'Delta',v:'+0.58',c:'green'},{l:'Gamma',v:'0.041',c:'green'},
+      {l:'Vega',v:'-0.22',c:'red'},{l:'Theta',v:'-1.84',c:'red'},
+      {l:'Vanna',v:'+0.12',c:'orange'},{l:'Charm',v:'-0.06',c:'orange'},
+      {l:'IV',v:'13.8%',c:'orange'},{l:'OI Chg',v:'+8.2K',c:'green'},
+    ],
+    ind:[
+      {l:'PCR',v:'0.72',c:'green'},{l:'ADX',v:'34.2',c:'green'},{l:'ATR',v:'38.4',c:'orange'},
+      {l:'VWAP',v:'22,847',c:'gold'},{l:'9EMA',v:'22,834',c:'green'},{l:'MaxPain',v:'22,800',c:'gold'},
+    ],
+    entry:'22,856',sl:'22,814',target:'22,920',trail:'22,830 (1.5×ATR)',
+    logic:[
+      '📈 Delta >0.55 — Strong directional momentum confirmed',
+      '📊 ADX >30 — Trending market, no ranging risk',
+      '🔥 OI buildup positive — Call writers covering (bullish)',
+      '💧 PCR <0.80 — More calls than puts (bullish sentiment)',
+      '⚡ IV moderate 13.8% — Premium not overpriced',
+      '🎯 Price above VWAP & 9EMA — Momentum aligned',
+    ]
+  },
+  k2:{
+    no:'K-2',name:'BANKNIFTY SCALPER',index:'NSE · ATM Weekly Options · CE & PE',
+    tag:'SCALP',tagCls:'tag-s',
+    sig:'STRONG BUY',sigCls:'sig-str',score:'71/100',
+    greek:[
+      {l:'Delta',v:'+0.44',c:'green'},{l:'Gamma',v:'0.028',c:'green'},
+      {l:'Vega',v:'-0.31',c:'red'},{l:'Theta',v:'-2.14',c:'red'},
+      {l:'Vanna',v:'+0.08',c:'orange'},{l:'Charm',v:'-0.04',c:'orange'},
+      {l:'IV',v:'16.4%',c:'orange'},{l:'OI Chg',v:'+5.1K',c:'green'},
+    ],
+    ind:[
+      {l:'PCR',v:'1.12',c:'red'},{l:'ADX',v:'26.8',c:'orange'},{l:'ATR',v:'84.2',c:'orange'},
+      {l:'VWAP',v:'48,910',c:'gold'},{l:'9EMA',v:'48,895',c:'green'},{l:'MaxPain',v:'48,900',c:'gold'},
+    ],
+    entry:'48,920',sl:'48,820',target:'49,080',trail:'48,880 (1.5×ATR)',
+    logic:[
+      '📈 Delta +0.44 — Moderate bullish bias, manageable risk',
+      '📊 ADX 26.8 — Emerging trend, directional trade possible',
+      '⚠️ PCR 1.12 — Slight put bias, use smaller lot size',
+      '💧 OI buildup mixed — Watch for reversal at 49,000',
+      '⚡ IV 16.4% — Slightly elevated, premium adequate',
+      '🎯 Price at VWAP resistance — Wait for clear breakout',
+    ]
+  },
+  k3:{
+    no:'K-3',name:'FINNIFTY SCALPER',index:'NSE · ATM Weekly Options · CE & PE',
+    tag:'SCALP',tagCls:'tag-s',
+    sig:'MODERATE BUY',sigCls:'sig-mod',score:'63/100',
+    greek:[
+      {l:'Delta',v:'+0.38',c:'green'},{l:'Gamma',v:'0.019',c:'orange'},
+      {l:'Vega',v:'-0.28',c:'red'},{l:'Theta',v:'-1.62',c:'red'},
+      {l:'Vanna',v:'+0.04',c:'orange'},{l:'Charm',v:'-0.03',c:'orange'},
+      {l:'IV',v:'18.2%',c:'red'},{l:'OI Chg',v:'-2.4K',c:'red'},
+    ],
+    ind:[
+      {l:'PCR',v:'1.28',c:'red'},{l:'ADX',v:'22.1',c:'orange'},{l:'ATR',v:'52.6',c:'orange'},
+      {l:'VWAP',v:'24,148',c:'gold'},{l:'9EMA',v:'24,135',c:'orange'},{l:'MaxPain',v:'24,100',c:'gold'},
+    ],
+    entry:'24,150',sl:'24,080',target:'24,240',trail:'24,120 (1.5×ATR)',
+    logic:[
+      '⚠️ Delta +0.38 — Weak momentum, risky for full position',
+      '📊 ADX 22.1 — Market ranging, trend not confirmed',
+      '🔴 PCR 1.28 — Put heavy — bearish pressure possible',
+      '🔴 OI decreasing — Long unwinding detected',
+      '⚡ IV 18.2% high — Premium expensive, theta risk',
+      '🎯 Score 63 — Minimum threshold. Half lot only.',
+    ]
+  },
+  k4:{
+    no:'K-4',name:'SENSEX SCALPER',index:'BSE · ATM Weekly Options · CE & PE',
+    tag:'SCALP',tagCls:'tag-s',
+    sig:'WAIT — NO TRADE',sigCls:'sig-wait',score:'48/100',
+    greek:[
+      {l:'Delta',v:'-0.12',c:'red'},{l:'Gamma',v:'0.015',c:'orange'},
+      {l:'Vega',v:'-0.09',c:'red'},{l:'Theta',v:'-0.84',c:'red'},
+      {l:'Vanna',v:'-0.03',c:'red'},{l:'Charm',v:'+0.02',c:'orange'},
+      {l:'IV',v:'12.1%',c:'green'},{l:'OI Chg',v:'-4.8K',c:'red'},
+    ],
+    ind:[
+      {l:'PCR',v:'0.68',c:'green'},{l:'ADX',v:'18.4',c:'red'},{l:'ATR',v:'142.0',c:'red'},
+      {l:'VWAP',v:'75,240',c:'gold'},{l:'9EMA',v:'75,180',c:'red'},{l:'MaxPain',v:'75,000',c:'gold'},
+    ],
+    entry:'—',sl:'—',target:'—',trail:'NO POSITION',
+    logic:[
+      '🚫 Delta negative — Directional bias unclear or bearish',
+      '🚫 ADX 18.4 — Below 20 threshold — ranging market',
+      '🚫 OI falling fast — Short covering, no clear direction',
+      '🚫 Score 48 — Below 55 minimum — DO NOT TRADE',
+      '⏳ Wait for ADX >25 and positive delta confirmation',
+      '⏳ Next scan: Check again after 30 minutes',
+    ]
+  },
+  s1:{
+    no:'S-1',name:'NIFTY WEEKLY EXPIRY',index:'NSE · Thursday Expiry · Max Pain Play',
+    tag:'EXPIRY',tagCls:'tag-e',
+    sig:'ULTRA STRONG+',sigCls:'sig-ult',score:'96/100',
+    greek:[
+      {l:'MaxPain',v:'22,800',c:'gold'},{l:'PCR',v:'0.64',c:'green'},
+      {l:'Theta',v:'-2.84',c:'red'},{l:'Vanna',v:'+0.14',c:'green'},
+      {l:'Charm',v:'-0.08',c:'red'},{l:'ADX',v:'38.6',c:'green'},
+      {l:'IV',v:'11.2%',c:'green'},{l:'OI Chg',v:'+14.2K',c:'green'},
+    ],
+    ind:[
+      {l:'Spot',v:'22,856',c:'gold'},{l:'Strike',v:'22,800',c:'gold'},{l:'ITM/OTM',v:'ITM 56',c:'green'},
+      {l:'Days Left',v:'2D',c:'orange'},{l:'ATR',v:'38.4',c:'orange'},{l:'VWAP',v:'22,847',c:'gold'},
+    ],
+    entry:'22,800 CE',sl:'22,750',target:'22,950',trail:'22,765 (1.5×ATR)',
+    logic:[
+      '🔥 Max Pain 22,800 = current ATM — Pinning likely',
+      '📈 PCR 0.64 — Call writers dominating (very bullish)',
+      '⚡ Theta -2.84 — High time decay near expiry (sell premium)',
+      '💎 ADX 38.6 — Strong trend confirmed, ride it',
+      '🎯 Charm -0.08 — Delta increasing as expiry approaches',
+      '🚀 Score 96 — Highest confidence. Full lot size.',
+    ]
+  },
+  s2:{
+    no:'S-2',name:'BANKNIFTY WEEKLY EXPIRY',index:'NSE · Wednesday Expiry · Max Pain Play',
+    tag:'EXPIRY',tagCls:'tag-e',
+    sig:'STRONG BUY',sigCls:'sig-str',score:'74/100',
+    greek:[
+      {l:'MaxPain',v:'48,900',c:'gold'},{l:'PCR',v:'0.78',c:'green'},
+      {l:'Theta',v:'-3.12',c:'red'},{l:'Vanna',v:'+0.09',c:'green'},
+      {l:'Charm',v:'-0.05',c:'red'},{l:'ADX',v:'29.4',c:'orange'},
+      {l:'IV',v:'14.8%',c:'orange'},{l:'OI Chg',v:'+6.8K',c:'green'},
+    ],
+    ind:[
+      {l:'Spot',v:'48,956',c:'gold'},{l:'Strike',v:'49,000',c:'gold'},{l:'ITM/OTM',v:'OTM 44',c:'orange'},
+      {l:'Days Left',v:'1D',c:'red'},{l:'ATR',v:'84.2',c:'orange'},{l:'VWAP',v:'48,910',c:'gold'},
+    ],
+    entry:'49,000 CE',sl:'48,850',target:'49,200',trail:'48,870 (1.5×ATR)',
+    logic:[
+      '🔥 1 Day to expiry — High theta burn expected',
+      '📈 PCR 0.78 — Mild bullish bias from call side',
+      '⚡ Max Pain 48,900 — Spot near pain, expect pull',
+      '📊 ADX 29.4 — Decent trend, watch for reversal',
+      '🎯 Spot 56 pts below strike — Wait for 49,000 breakout',
+      '⚠️ Half lot only due to OTM risk near expiry',
+    ]
+  },
+  s3:{
+    no:'S-3',name:'NIFTY MONTHLY EXPIRY',index:'NSE · Last Thursday · Monthly Options',
+    tag:'EXPIRY',tagCls:'tag-e',
+    sig:'MODERATE BUY',sigCls:'sig-mod',score:'67/100',
+    greek:[
+      {l:'MaxPain',v:'23,000',c:'gold'},{l:'PCR',v:'0.94',c:'orange'},
+      {l:'Theta',v:'-1.42',c:'red'},{l:'Vanna',v:'+0.06',c:'orange'},
+      {l:'Charm',v:'-0.03',c:'orange'},{l:'ADX',v:'24.7',c:'orange'},
+      {l:'IV',v:'16.4%',c:'orange'},{l:'OI Chg',v:'+3.2K',c:'orange'},
+    ],
+    ind:[
+      {l:'Spot',v:'22,856',c:'gold'},{l:'Strike',v:'23,000',c:'gold'},{l:'ITM/OTM',v:'OTM 144',c:'red'},
+      {l:'Days Left',v:'12D',c:'green'},{l:'ATR',v:'38.4',c:'orange'},{l:'VWAP',v:'22,847',c:'gold'},
+    ],
+    entry:'23,000 CE',sl:'22,920',target:'23,150',trail:'22,940 (1.5×ATR)',
+    logic:[
+      '📅 12 days to expiry — Time decay moderate, manageable',
+      '📊 Spot 144 pts OTM — Needs strong move to profit',
+      '⚠️ PCR 0.94 — Near neutral, no clear directional signal',
+      '📈 ADX 24.7 — Weak trend, wait for confirmation',
+      '🎯 Score 67 — Trade with caution, smaller capital',
+      '⏳ Monthly strategy — Hold through consolidation',
+    ]
+  },
+  s4:{
+    no:'S-4',name:'BANKNIFTY MONTHLY EXPIRY',index:'NSE · Last Wednesday · Monthly Options',
+    tag:'EXPIRY',tagCls:'tag-e',
+    sig:'WAIT — LOW VOLUME',sigCls:'sig-wait',score:'52/100',
+    greek:[
+      {l:'MaxPain',v:'49,200',c:'gold'},{l:'PCR',v:'1.18',c:'red'},
+      {l:'Theta',v:'-1.08',c:'red'},{l:'Vanna',v:'-0.02',c:'red'},
+      {l:'Charm',v:'-0.04',c:'orange'},{l:'ADX',v:'19.2',c:'red'},
+      {l:'IV',v:'18.8%',c:'red'},{l:'OI Chg',v:'-3.6K',c:'red'},
+    ],
+    ind:[
+      {l:'Spot',v:'48,956',c:'gold'},{l:'Strike',v:'49,200',c:'gold'},{l:'ITM/OTM',v:'OTM 244',c:'red'},
+      {l:'Days Left',v:'18D',c:'green'},{l:'ATR',v:'84.2',c:'orange'},{l:'VWAP',v:'48,910',c:'gold'},
+    ],
+    entry:'—',sl:'—',target:'—',trail:'NO POSITION',
+    logic:[
+      '🚫 PCR 1.18 — Put heavy, bearish pressure dominant',
+      '🚫 ADX 19.2 — Below threshold, ranging/choppy market',
+      '🚫 OI falling -3.6K — Longs exiting, no conviction',
+      '🚫 Spot 244 pts OTM — Too far for monthly entry now',
+      '🚫 Score 52 — Below 55 minimum — DO NOT TRADE',
+      '⏳ Wait for PCR <1 and ADX >25 before considering',
+    ]
+  },
+};
+
+/* ── OPEN MODAL ── */
+function openModal(id){
+  const d=MODALS[id];if(!d)return;
+  const C=(c)=>`var(--${c==='gold'?'gold':c})`;
+
+  const greekHtml=d.greek.map(g=>`
+    <div class="mpill">
+      <div class="mplab">${g.l}</div>
+      <div class="mpval" style="color:var(--${g.c==='gold'?'gold':g.c})">${g.v}</div>
+    </div>`).join('');
+
+  const indHtml=d.ind.map(g=>`
+    <div class="mpill">
+      <div class="mplab">${g.l}</div>
+      <div class="mpval" style="color:var(--${g.c==='gold'?'gold':g.c})">${g.v}</div>
+    </div>`).join('');
+
+  const logicHtml=d.logic.map(l=>`
+    <div class="logic-item">
+      <div class="logic-txt">${l}</div>
+    </div>`).join('');
+
+  const isNoTrade=(d.entry==='—');
+
+  document.getElementById('modal-content').innerHTML=`
+    <div class="mhead">
+      <div class="m-scanner-no">${d.no} · <span class="ctag ${d.tagCls}" style="font-size:9px;padding:1px 5px">${d.tag}</span></div>
+      <div class="m-name">${d.name}</div>
+      <div class="m-index">${d.index}</div>
+    </div>
+
+    <div class="msec">
+      <div class="msec-title">Signal Strength</div>
+      <div class="m-sig">
+        <span class="m-sig-txt ${d.sigCls}">${d.sig}</span>
+        <span class="m-sig-sc ${d.sigCls}">${d.score}</span>
+      </div>
+    </div>
+
+    <div class="msec">
+      <div class="msec-title">Options Greeks — Independent</div>
+      <div class="mgrid4">${greekHtml}</div>
+    </div>
+
+    <div class="msec">
+      <div class="msec-title">Technical Indicators — Independent</div>
+      <div class="mgrid3">${indHtml}</div>
+    </div>
+
+    <div class="msec">
+      <div class="msec-title">Trade Parameters</div>
+      <div class="mentry-row">
+        <div class="mentr">
+          <div class="mpl">Entry</div>
+          <div class="mpv" style="color:${isNoTrade?'var(--dim)':'var(--gold)'}">${d.entry}</div>
+        </div>
+        <div class="mentr">
+          <div class="mpl">Stop Loss</div>
+          <div class="mpv" style="color:${isNoTrade?'var(--dim)':'var(--red)'}">${d.sl}</div>
+        </div>
+        <div class="mentr">
+          <div class="mpl">Target</div>
+          <div class="mpv" style="color:${isNoTrade?'var(--dim)':'var(--green)'}">${d.target}</div>
+        </div>
+      </div>
+      ${!isNoTrade?`
+      <div class="trail">
+        <span class="trl">Trailing SL</span>
+        <span class="trv">${d.trail}</span>
+        <button class="trbtn" onclick="alert('Trailing SL Updated!')">UPDATE</button>
+      </div>`:''}
+    </div>
+
+    <div class="msec">
+      <div class="msec-title">Scanner Logic — Why This Signal</div>
+      <div class="logic-box">${logicHtml}</div>
+    </div>
+
+    <div style="height:16px"></div>
+  `;
+
+  document.getElementById('modal-bg').classList.add('open');
+  document.getElementById('modal-bg').scrollTop=0;
+}
+
+/* ── CLOSE MODAL ── */
+function closeModal(){
+  document.getElementById('modal-bg').classList.remove('open');
+}
+function bgClick(e){
+  if(e.target===document.getElementById('modal-bg'))closeModal();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+</script>
+</body>
+</html>

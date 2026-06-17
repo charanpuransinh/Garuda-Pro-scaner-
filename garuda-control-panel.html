@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GARUDA POWER – Master Control</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;500;700;900&display=swap');
+
+  :root {
+    --bg: #06060D;
+    --card: #0E0E1A;
+    --card2: #13131F;
+    --border: #1E1E32;
+    --gold: #C9A227;
+    --gold2: #F0C84A;
+    --green: #00E676;
+    --green2: #69F0AE;
+    --amber: #FFB300;
+    --red: #FF3D5A;
+    --blue: #4FC3F7;
+    --purple: #CE93D8;
+    --text: #E0E0F0;
+    --muted: #6B6B8A;
+    --ultra: #FFD700;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0A0A18 0%, #111128 100%);
+    border-bottom: 1px solid var(--gold);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    width: 36px; height: 36px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header-title { flex: 1; }
+  .header-title h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--gold2);
+    letter-spacing: 2px;
+  }
+  .header-title p {
+    font-size: 10px; color: var(--muted);
+    letter-spacing: 1px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .live-badge {
+    background: #001A0A;
+    border: 1px solid var(--green);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(1.4); }
+  }
+
+  /* SCORE BANNER */
+  .score-banner {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .score-banner::-webkit-scrollbar { display: none; }
+  .score-label {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    white-space: nowrap;
+    min-width: fit-content;
+  }
+  .score-chips { display: flex; gap: 6px; }
+  .chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .chip-alert  { background: #1A1500; border: 1px solid var(--amber); color: var(--amber); }
+  .chip-buy    { background: #001A08; border: 1px solid var(--green); color: var(--green); }
+  .chip-strong { background: #001A08; border: 1px solid var(--green2); color: var(--green2); }
+  .chip-ultra  { background: #1A1300; border: 1px solid var(--ultra); color: var(--ultra); }
+
+  /* SCORE METER */
+  .score-meter-wrap {
+    padding: 14px 16px 10px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .score-meter-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .score-title {
+    font-size: 11px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .score-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green2);
+  }
+  .score-signal {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green2);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .meter-bar {
+    height: 8px;
+    background: #1A1A2A;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .meter-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--amber) 0%, var(--green) 50%, var(--ultra) 100%);
+    transition: width 1s ease;
+    position: relative;
+  }
+  .meter-fill::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: -2px;
+    width: 4px; height: 12px;
+    background: white;
+    border-radius: 2px;
+    box-shadow: 0 0 6px white;
+  }
+  .meter-ticks {
+    display: flex; justify-content: space-between;
+    margin-top: 4px;
+  }
+  .meter-tick {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* MAIN CONTENT */
+  .main { padding: 12px; }
+
+  /* SECTION HEADER */
+  .section-head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .section-head span {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .section-head::before, .section-head::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CONTROL GRID */
+  .control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* CONTROL BOX */
+  .ctrl-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .ctrl-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+    border-radius: 12px 0 0 12px;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .ctrl-box:hover { border-color: var(--gold); background: var(--card2); }
+  .ctrl-box:hover::before { opacity: 1; }
+  .ctrl-box:active { transform: scale(0.97); }
+
+  .ctrl-box .box-icon {
+    font-size: 26px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .ctrl-box .box-num {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--border);
+    font-weight: 700;
+  }
+  .ctrl-box .box-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+  }
+  .ctrl-box .box-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .ctrl-box .box-status {
+    margin-top: 8px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .status-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.5s infinite;
+  }
+  .status-dot.amber { background: var(--amber); }
+  .status-dot.red { background: var(--red); }
+  .status-text { font-size: 10px; color: var(--green); font-family: 'Share Tech Mono', monospace; }
+  .status-text.amber { color: var(--amber); }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    display: none;
+    animation: slideIn 0.3s ease;
+  }
+  .detail-panel.active { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 12px;
+    width: fit-content;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { border-color: var(--gold); background: var(--card2); }
+
+  .detail-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .detail-header {
+    background: linear-gradient(135deg, #111128 0%, #0E0E20 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .detail-header-icon { font-size: 28px; }
+  .detail-header-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gold2);
+    letter-spacing: 1px;
+  }
+  .detail-header-sub {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .detail-body { padding: 14px; }
+
+  /* ROW */
+  .d-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #111120;
+  }
+  .d-row:last-child { border-bottom: none; }
+  .d-key {
+    font-size: 12px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .d-val {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px; font-weight: 700;
+    color: var(--text);
+  }
+  .d-val.green { color: var(--green); }
+  .d-val.amber { color: var(--amber); }
+  .d-val.red { color: var(--red); }
+  .d-val.gold { color: var(--gold2); }
+  .d-val.ultra { color: var(--ultra); }
+
+  /* TARGET TABLE */
+  .target-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+  .target-table th {
+    background: #0A0A18;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    padding: 7px 8px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 1px;
+  }
+  .target-table td {
+    padding: 8px 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 600;
+    border-bottom: 1px solid #0D0D1A;
+  }
+  .target-table tr:last-child td { border-bottom: none; }
+  .target-table tr:hover td { background: #0D0D20; }
+  .t-hit { color: var(--green); }
+  .t-pending { color: var(--amber); }
+  .t-sl { color: var(--red); }
+  .t-trail { color: var(--blue); }
+  .t-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .tb-buy { background: #001A08; border: 1px solid var(--green); color: var(--green); }
+  .tb-wait { background: #1A1000; border: 1px solid var(--amber); color: var(--amber); }
+  .tb-sl { background: #1A0008; border: 1px solid var(--red); color: var(--red); }
+  .tb-active { background: #001418; border: 1px solid var(--blue); color: var(--blue); }
+
+  /* MINI PROGRESS */
+  .mini-prog { margin: 4px 0; }
+  .mini-prog-bar {
+    height: 4px; background: #1A1A2A; border-radius: 2px; overflow: hidden;
+  }
+  .mini-prog-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--green), var(--ultra));
+  }
+  .mini-prog-label {
+    display: flex; justify-content: space-between;
+    font-size: 10px; margin-bottom: 3px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .mini-prog-label span:first-child { color: var(--muted); }
+  .mini-prog-label span:last-child { color: var(--green); font-weight: 700; }
+
+  /* STAT GRID */
+  .stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin: 10px 0;
+  }
+  .stat-box {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat-box .sv {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px; font-weight: 900;
+  }
+  .stat-box .sk {
+    font-size: 9px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    margin-top: 2px;
+  }
+
+  /* ALGO LIST */
+  .algo-list { margin: 10px 0; }
+  .algo-row {
+    display: flex; align-items: center;
+    gap: 8px; padding: 7px 0;
+    border-bottom: 1px solid #0D0D1A;
+  }
+  .algo-row:last-child { border-bottom: none; }
+  .algo-icon { font-size: 16px; min-width: 22px; }
+  .algo-name {
+    flex: 1;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; font-weight: 600;
+    color: var(--text);
+  }
+  .algo-score {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+  }
+  .algo-vote {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 36px;
+    text-align: center;
+  }
+  .vote-buy { background: #001A08; color: var(--green); }
+  .vote-wait { background: #1A1000; color: var(--amber); }
+
+  /* MONITOR ITEMS */
+  .monitor-item {
+    display: flex; align-items: flex-start;
+    gap: 10px; padding: 9px 0;
+    border-bottom: 1px solid #0D0D1A;
+  }
+  .monitor-item:last-child { border-bottom: none; }
+  .monitor-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .mi-green { background: #001A08; border: 1px solid var(--green); }
+  .mi-amber { background: #1A1000; border: 1px solid var(--amber); }
+  .mi-red { background: #1A0005; border: 1px solid var(--red); }
+  .mi-blue { background: #001018; border: 1px solid var(--blue); }
+  .monitor-info { flex: 1; }
+  .monitor-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--text);
+  }
+  .monitor-desc {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    margin-top: 2px;
+    line-height: 1.5;
+  }
+  .monitor-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* RISK METER */
+  .risk-gauge {
+    margin: 12px 0;
+    padding: 12px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .risk-title {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .risk-bar {
+    height: 12px; background: #1A1A2A;
+    border-radius: 6px; overflow: hidden;
+    position: relative;
+  }
+  .risk-fill {
+    height: 100%; border-radius: 6px;
+    transition: width 1s ease;
+  }
+  .rf-safe { background: linear-gradient(90deg, #00E676, #69F0AE); }
+  .rf-warn { background: linear-gradient(90deg, #FFB300, #FF6F00); }
+  .rf-danger { background: linear-gradient(90deg, #FF3D5A, #FF0033); }
+  .risk-labels {
+    display: flex; justify-content: space-between;
+    margin-top: 5px;
+    font-size: 9px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* LEADERBOARD */
+  .lb-row {
+    display: flex; align-items: center;
+    gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid #0D0D1A;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; font-weight: 900;
+    flex-shrink: 0;
+  }
+  .lbr-1 { background: var(--ultra); color: #000; }
+  .lbr-2 { background: #C0C0C0; color: #000; }
+  .lbr-3 { background: #CD7F32; color: #000; }
+  .lbr-n { background: var(--card2); border: 1px solid var(--border); color: var(--muted); }
+  .lb-name {
+    flex: 1;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700;
+  }
+  .lb-acc {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    color: var(--green);
+  }
+  .lb-trades {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #080812;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 12px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .nav-item.active { opacity: 1; }
+  .nav-item .nav-icon { font-size: 18px; }
+  .nav-item .nav-label {
+    font-size: 9px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+  }
+  .nav-item:not(.active) .nav-label { color: var(--muted); }
+
+  .page-pad { padding-bottom: 70px; }
+
+  /* SEPARATOR */
+  .sep { height: 1px; background: var(--border); margin: 10px 0; }
+
+  /* INFO NOTICE */
+  .info-notice {
+    background: #001418;
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 10px;
+    color: var(--blue);
+    font-family: 'Share Tech Mono', monospace;
+    display: flex; gap: 6px;
+    align-items: flex-start;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+
+  .warning-notice {
+    background: #1A0A00;
+    border: 1px solid var(--amber);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 10px;
+    color: var(--amber);
+    font-family: 'Share Tech Mono', monospace;
+    display: flex; gap: 6px;
+    align-items: flex-start;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">🦅</div>
+  <div class="header-title">
+    <h1>GARUDA POWER</h1>
+    <p>MASTER CONTROL PANEL · ADVANCED FUSION GROUP D</p>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    LIVE
+  </div>
+</div>
+
+<!-- SCORE BANNER -->
+<div class="score-banner">
+  <span class="score-label">SIGNAL ZONES:</span>
+  <div class="score-chips">
+    <div class="chip chip-alert">🟡 60-65% ALERT</div>
+    <div class="chip chip-buy">🟢 65-75% BUY</div>
+    <div class="chip chip-strong">💚 75-95% STRONG BUY</div>
+    <div class="chip chip-ultra">⭐ 95%+ ULTRA</div>
+  </div>
+</div>
+
+<!-- SCORE METER -->
+<div class="score-meter-wrap">
+  <div class="score-meter-top">
+    <span class="score-title">SCANNER SCORE</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="score-value">78.5%</span>
+      <span class="score-signal">💚 STRONG BUY</span>
+    </div>
+  </div>
+  <div class="meter-bar">
+    <div class="meter-fill" style="width:78.5%"></div>
+  </div>
+  <div class="meter-ticks">
+    <span class="meter-tick">0%</span>
+    <span class="meter-tick">60%</span>
+    <span class="meter-tick">65%</span>
+    <span class="meter-tick">75%</span>
+    <span class="meter-tick">95%</span>
+    <span class="meter-tick">100%</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main page-pad">
+
+  <!-- OVERVIEW GRID (shown by default) -->
+  <div id="overviewSection">
+    <div class="section-head"><span>MASTER CONTROL</span></div>
+
+    <div class="control-grid">
+
+      <!-- BOX 1: AI Signal Verifier -->
+      <div class="ctrl-box" onclick="showDetail('ai')">
+        <span class="box-icon">🤖</span>
+        <span class="box-num">01</span>
+        <div class="box-label">AI Signal<br>Verifier</div>
+        <div class="box-sub">8 algos · confidence 82%</div>
+        <div class="box-status">
+          <div class="status-dot"></div>
+          <span class="status-text">ANALYZING</span>
+        </div>
+      </div>
+
+      <!-- BOX 2: Entry/Exit Table -->
+      <div class="ctrl-box" onclick="showDetail('entry')">
+        <span class="box-icon">📊</span>
+        <span class="box-num">02</span>
+        <div class="box-label">Entry / Exit<br>Table</div>
+        <div class="box-sub">T1·T2·T3 + SL + Trail</div>
+        <div class="box-status">
+          <div class="status-dot amber"></div>
+          <span class="status-text amber">1 OPEN</span>
+        </div>
+      </div>
+
+      <!-- BOX 3: Trade Monitoring -->
+      <div class="ctrl-box" onclick="showDetail('monitor')">
+        <span class="box-icon">👁️</span>
+        <span class="box-num">03</span>
+        <div class="box-label">Trade<br>Monitoring</div>
+        <div class="box-sub">Auto-exit · Live P&amp;L</div>
+        <div class="box-status">
+          <div class="status-dot"></div>
+          <span class="status-text">WATCHING</span>
+        </div>
+      </div>
+
+      <!-- BOX 4: Day Summary -->
+      <div class="ctrl-box" onclick="showDetail('day')">
+        <span class="box-icon">📈</span>
+        <span class="box-num">04</span>
+        <div class="box-label">Day<br>Summary</div>
+        <div class="box-sub">P&amp;L · Stats · Trades</div>
+        <div class="box-status">
+          <div class="status-dot"></div>
+          <span class="status-text" style="color:var(--green2)">+₹2,480</span>
+        </div>
+      </div>
+
+      <!-- BOX 5: Risk Management -->
+      <div class="ctrl-box" onclick="showDetail('risk')">
+        <span class="box-icon">🛡️</span>
+        <span class="box-num">05</span>
+        <div class="box-label">Risk<br>Management</div>
+        <div class="box-sub">Position · Max loss</div>
+        <div class="box-status">
+          <div class="status-dot"></div>
+          <span class="status-text">SAFE ZONE</span>
+        </div>
+      </div>
+
+      <!-- BOX 6: Accuracy Scoreboard -->
+      <div class="ctrl-box" onclick="showDetail('score')">
+        <span class="box-icon">🏆</span>
+        <span class="box-num">06</span>
+        <div class="box-label">Accuracy<br>Scoreboard</div>
+        <div class="box-sub">Win rate · Per scanner</div>
+        <div class="box-status">
+          <div class="status-dot"></div>
+          <span class="status-text" style="color:var(--ultra)">76.4% WIN</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- DETAIL: AI SIGNAL VERIFIER -->
+  <!-- ─────────────────────────────────────── -->
+  <div id="detail-ai" class="detail-panel">
+    <div class="back-btn" onclick="goBack()">← BACK</div>
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-header-icon">🤖</div>
+        <div>
+          <div class="detail-header-title">AI SIGNAL VERIFIER</div>
+          <div class="detail-header-sub">ADVANCED FUSION · 8 ALGORITHMS · REAL-TIME</div>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <div class="d-row">
+          <span class="d-key">OVERALL CONFIDENCE</span>
+          <span class="d-val ultra">82% ⭐</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">AI DECISION</span>
+          <span class="d-val green">💚 STRONG BUY</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">TOTAL VOTES</span>
+          <span class="d-val gold">6 BUY · 1 WAIT · 1 ⏳</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">FUSION MODE</span>
+          <span class="d-val">ADVANCED GROUP D</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">LAST UPDATED</span>
+          <span class="d-val" style="color:var(--blue);">14:23:57</span>
+        </div>
+
+        <div class="sep"></div>
+        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:8px;letter-spacing:1px;">ALGORITHM BREAKDOWN</div>
+
+        <div class="algo-list">
+          <div class="algo-row">
+            <span class="algo-icon">⏱️</span>
+            <span class="algo-name">Multi Timeframe</span>
+            <span class="algo-score" style="color:var(--green);margin-right:6px;">79%</span>
+            <span class="algo-vote vote-buy">BUY</span>
+          </div>
+          <div class="algo-row">
+            <span class="algo-icon">🔗</span>
+            <span class="algo-name">Pair Correlation</span>
+            <span class="algo-score" style="color:var(--green);margin-right:6px;">71%</span>
+            <span class="algo-vote vote-buy">BUY</span>
+          </div>
+          <div class="algo-row">
+            <span class="algo-icon">🌪️</span>
+            <span class="algo-name">Volatility Squeeze</span>
+            <span class="algo-score" style="color:var(--amber);margin-right:6px;">63%</span>
+            <span class="algo-vote vote-wait">WAIT</span>
+          </div>
+          <div class="algo-row">
+            <span class="algo-icon">🤖</span>
+            <span class="algo-name">ML Signal Engine</span>
+            <span class="algo-score" style="color:var(--green);margin-right:6px;">85%</span>
+            <span class="algo-vote vote-buy">BUY</span>
+          </div>
+          <div class="algo-row">
+            <span class="algo-icon">🧠</span>
+            <span class="algo-name">Sentiment Fusion</span>
+            <span class="algo-score" style="color:var(--ultra);margin-right:6px;">91%</span>
+            <span class="algo-vote vote-buy">BUY</span>
+          </div>
+          <div class="algo-row">
+            <span class="algo-icon">🔬</span>
+            <span class="algo-name">Market Microstructure</span>
+            <span class="algo-score" style="color:var(--green);margin-right:6px;">77%</span>
+            <span class="algo-vote vote-buy">BUY</span>
+          </div>
+          <div class="algo-row">
+            <span class="algo-icon">📅</span>
+            <span class="algo-name">Seasonality Cycle</span>
+            <span class="algo-score" style="color:var(--green);margin-right:6px;">68%</span>
+            <span class="algo-vote vote-buy">BUY</span>
+          </div>
+          <div class="algo-row">
+            <span class="algo-icon">⚡</span>
+            <span class="algo-name">Ultimate Fusion</span>
+            <span class="algo-score" style="color:var(--amber);margin-right:6px;">61%</span>
+            <span class="algo-vote vote-wait">WAIT</span>
+          </div>
+        </div>
+
+        <div class="info-notice">ℹ️ AI verifies all scanner votes before generating final signal. Minimum 6/8 BUY votes required for STRONG BUY confirmation.</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- DETAIL: ENTRY / EXIT TABLE -->
+  <!-- ─────────────────────────────────────── -->
+  <div id="detail-entry" class="detail-panel">
+    <div class="back-btn" onclick="goBack()">← BACK</div>
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-header-icon">📊</div>
+        <div>
+          <div class="detail-header-title">ENTRY / EXIT TABLE</div>
+          <div class="detail-header-sub">TARGETS · STOP LOSS · TRAILING</div>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <div class="d-row">
+          <span class="d-key">SYMBOL</span>
+          <span class="d-val gold">RELIANCE NSE</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">ENTRY PRICE</span>
+          <span class="d-val">₹ 2,847.50</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">ENTRY TIME</span>
+          <span class="d-val" style="color:var(--blue)">13:42:18</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">SIGNAL TYPE</span>
+          <span class="d-val green">💚 STRONG BUY</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">TRADE TYPE</span>
+          <span class="d-val">INTRADAY · LONG</span>
+        </div>
+
+        <div class="sep"></div>
+
+        <table class="target-table">
+          <thead>
+            <tr>
+              <th>LEVEL</th>
+              <th>PRICE</th>
+              <th>GAIN %</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">T1</td>
+              <td class="t-hit">₹ 2,876</td>
+              <td class="t-hit">+1.0%</td>
+              <td><span class="t-badge tb-buy">✓ HIT</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">T2</td>
+              <td class="t-pending">₹ 2,905</td>
+              <td class="t-pending">+2.0%</td>
+              <td><span class="t-badge tb-wait">PENDING</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">T3</td>
+              <td class="t-pending">₹ 2,960</td>
+              <td class="t-pending">+3.9%</td>
+              <td><span class="t-badge tb-wait">PENDING</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">SL</td>
+              <td class="t-sl">₹ 2,818</td>
+              <td class="t-sl">−1.0%</td>
+              <td><span class="t-badge tb-sl">ACTIVE</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">TSL</td>
+              <td class="t-trail">₹ 2,848</td>
+              <td class="t-trail">TRAIL</td>
+              <td><span class="t-badge tb-active">RUNNING</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="sep"></div>
+
+        <div class="mini-prog">
+          <div class="mini-prog-label">
+            <span>PROGRESS TO T2</span>
+            <span>51%</span>
+          </div>
+          <div class="mini-prog-bar"><div class="mini-prog-fill" style="width:51%"></div></div>
+        </div>
+
+        <div class="mini-prog">
+          <div class="mini-prog-label">
+            <span>RISK:REWARD RATIO</span>
+            <span>1:3.9</span>
+          </div>
+          <div class="mini-prog-bar"><div class="mini-prog-fill" style="width:78%"></div></div>
+        </div>
+
+        <div class="warning-notice">⚡ Trailing SL activated after T1 hit. SL shifted to entry price to protect capital.</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- DETAIL: TRADE MONITORING -->
+  <!-- ─────────────────────────────────────── -->
+  <div id="detail-monitor" class="detail-panel">
+    <div class="back-btn" onclick="goBack()">← BACK</div>
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-header-icon">👁️</div>
+        <div>
+          <div class="detail-header-title">TRADE MONITORING</div>
+          <div class="detail-header-sub">AUTO-EXIT · LIVE P&L · SMART ALERTS</div>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <div class="d-row">
+          <span class="d-key">MONITORING STATUS</span>
+          <span class="d-val green" style="animation:pulse 1.5s infinite">● ACTIVE</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">CURRENT PRICE</span>
+          <span class="d-val ultra">₹ 2,889.25</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">LIVE P&amp;L</span>
+          <span class="d-val green">+₹ 1,260 &nbsp;(+1.45%)</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">POSITION SIZE</span>
+          <span class="d-val">30 QTY</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">TIME IN TRADE</span>
+          <span class="d-val" style="color:var(--blue)">41 MIN</span>
+        </div>
+
+        <div class="sep"></div>
+        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:8px;letter-spacing:1px;">AUTO-EXIT CONDITIONS</div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon mi-red">🚨</div>
+          <div class="monitor-info">
+            <div class="monitor-label">SL Auto-Exit</div>
+            <div class="monitor-desc">Price drops below ₹2,818 → Instant market exit triggered. Zero manual intervention.</div>
+            <div class="monitor-val" style="color:var(--red)">TRIGGER: ₹2,818</div>
+          </div>
+        </div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon mi-blue">📈</div>
+          <div class="monitor-info">
+            <div class="monitor-label">Trailing SL Move</div>
+            <div class="monitor-desc">After each target hit, SL shifts up automatically to lock in profit.</div>
+            <div class="monitor-val" style="color:var(--blue)">CURRENT TSL: ₹2,848</div>
+          </div>
+        </div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon mi-amber">⏰</div>
+          <div class="monitor-info">
+            <div class="monitor-label">EOD Auto-Exit</div>
+            <div class="monitor-desc">If trade is still open at 15:15, position will be automatically squared off.</div>
+            <div class="monitor-val" style="color:var(--amber)">CLOSES AT: 15:15:00</div>
+          </div>
+        </div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon mi-green">💰</div>
+          <div class="monitor-info">
+            <div class="monitor-label">Target Partial Exit</div>
+            <div class="monitor-desc">T1 reached: 50% qty exited. Remaining 15 qty riding to T2/T3.</div>
+            <div class="monitor-val" style="color:var(--green)">BOOKED: +₹420</div>
+          </div>
+        </div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon mi-red">📉</div>
+          <div class="monitor-info">
+            <div class="monitor-label">Reversal Detection</div>
+            <div class="monitor-desc">If momentum reverses with volume spike, early exit signal fires before SL.</div>
+            <div class="monitor-val" style="color:var(--muted)">STATUS: MONITORING</div>
+          </div>
+        </div>
+
+        <div class="info-notice">ℹ️ All exits are rule-based. Emotion-free trading enforced by system. Manual override available in ADMIN panel.</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- DETAIL: DAY SUMMARY -->
+  <!-- ─────────────────────────────────────── -->
+  <div id="detail-day" class="detail-panel">
+    <div class="back-btn" onclick="goBack()">← BACK</div>
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-header-icon">📈</div>
+        <div>
+          <div class="detail-header-title">DAY SUMMARY</div>
+          <div class="detail-header-sub">TODAY'S P&L · STATS · TRADE LOG</div>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="sv" style="color:var(--green)">+₹2,480</div>
+            <div class="sk">NET P&L TODAY</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv" style="color:var(--ultra)">76.4%</div>
+            <div class="sk">WIN RATE</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv" style="color:var(--blue)">7</div>
+            <div class="sk">TOTAL TRADES</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv" style="color:var(--gold2)">1:2.8</div>
+            <div class="sk">AVG R:R</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="d-row">
+          <span class="d-key">WINNING TRADES</span>
+          <span class="d-val green">5 WINS</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">LOSING TRADES</span>
+          <span class="d-val red">2 LOSS</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">GROSS PROFIT</span>
+          <span class="d-val green">+₹3,840</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">GROSS LOSS</span>
+          <span class="d-val red">−₹1,360</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">BEST TRADE</span>
+          <span class="d-val ultra">+₹980 (INFY)</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">WORST TRADE</span>
+          <span class="d-val red">−₹840 (HDFC)</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">SIGNALS GENERATED</span>
+          <span class="d-val">8 TOTAL</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">SIGNAL ACCURACY</span>
+          <span class="d-val gold">87.5%</span>
+        </div>
+
+        <div class="mini-prog" style="margin-top:10px;">
+          <div class="mini-prog-label">
+            <span>DAILY TARGET PROGRESS</span>
+            <span style="color:var(--ultra)">82%</span>
+          </div>
+          <div class="mini-prog-bar"><div class="mini-prog-fill" style="width:82%"></div></div>
+        </div>
+
+        <div class="mini-prog">
+          <div class="mini-prog-label">
+            <span>MAX LOSS USED</span>
+            <span style="color:var(--amber)">27%</span>
+          </div>
+          <div class="mini-prog-bar"><div class="mini-prog-fill" style="width:27%;background:linear-gradient(90deg,var(--green),var(--amber))"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- DETAIL: RISK MANAGEMENT -->
+  <!-- ─────────────────────────────────────── -->
+  <div id="detail-risk" class="detail-panel">
+    <div class="back-btn" onclick="goBack()">← BACK</div>
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-header-icon">🛡️</div>
+        <div>
+          <div class="detail-header-title">RISK MANAGEMENT</div>
+          <div class="detail-header-sub">POSITION SIZING · MAX LOSS · DAILY LIMITS</div>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <div class="d-row">
+          <span class="d-key">RISK STATUS</span>
+          <span class="d-val green">🛡️ SAFE ZONE</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">CAPITAL DEPLOYED</span>
+          <span class="d-val">₹ 85,425</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">PER TRADE RISK</span>
+          <span class="d-val amber">₹ 1,000 (1%)</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">MAX DAILY LOSS</span>
+          <span class="d-val red">₹ 5,000 (5%)</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">LOSS USED TODAY</span>
+          <span class="d-val green">₹ 1,360 (27%)</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">REMAINING RISK</span>
+          <span class="d-val green">₹ 3,640 LEFT</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">MAX POSITION SIZE</span>
+          <span class="d-val">30 QTY</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key">CONCURRENT TRADES</span>
+          <span class="d-val gold">MAX 3 OPEN</span>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="risk-gauge">
+          <div class="risk-title">DAILY RISK METER</div>
+          <div class="risk-bar">
+            <div class="risk-fill rf-safe" style="width:27%"></div>
+          </div>
+          <div class="risk-labels">
+            <span>0%</span>
+            <span>SAFE</span>
+            <span>CAUTION 50%</span>
+            <span>DANGER 80%</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <div class="monitor-item" style="margin-top:4px;">
+          <div class="monitor-icon mi-red">🚫</div>
+          <div class="monitor-info">
+            <div class="monitor-label">Circuit Breaker</div>
+            <div class="monitor-desc">If daily loss crosses ₹5,000, all trading is LOCKED for the day. No override.</div>
+            <div class="monitor-val" style="color:var(--red)">TRIGGER: −₹5,000</div>
+          </div>
+        </div>
+
+        <div class="monitor-item">
+          <div class="monitor-icon mi-amber">⚡</div>
+          <div class="monitor-info">
+            <div class="monitor-label">Position Sizing Rule</div>
+            <div class="monitor-desc">Qty calculated as: (Capital × 1%) ÷ (Entry − SL). Auto-adjusted per trade.</div>
+            <div class="monitor-val" style="color:var(--amber)">FORMULA: ACTIVE</div>
+          </div>
+        </div>
+
+        <div class="info-notice">ℹ️ Risk rules are enforced system-wide. Consistent sizing protects capital during drawdowns and maximizes compounding on winning streaks.</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- DETAIL: ACCURACY SCOREBOARD -->
+  <!-- ─────────────────────────────────────── -->
+  <div id="detail-score" class="detail-panel">
+    <div class="back-btn" onclick="goBack()">← BACK</div>
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-header-icon">🏆</div>
+        <div>
+          <div class="detail-header-title">ACCURACY SCOREBOARD</div>
+          <div class="detail-header-sub">WIN RATE · PER SCANNER · PERFORMANCE</div>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="sv" style="color:var(--ultra)">76.4%</div>
+            <div class="sk">OVERALL WIN RATE</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv" style="color:var(--green)">142</div>
+            <div class="sk">TOTAL SIGNALS</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv" style="color:var(--green2)">108</div>
+            <div class="sk">WINS</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv" style="color:var(--red)">34</div>
+            <div class="sk">LOSSES</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:8px;letter-spacing:1px;">TOP SCANNER RANKINGS</div>
+
+        <div class="algo-list">
+          <div class="lb-row">
+            <div class="lb-rank lbr-1">1</div>
+            <div>
+              <div class="lb-name">🧠 Sentiment Fusion</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Highest accuracy scanner</div>
+            </div>
+            <div>
+              <div class="lb-acc">91.2%</div>
+              <div class="lb-trades">24 trades</div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank lbr-2">2</div>
+            <div>
+              <div class="lb-name">🤖 ML Signal Engine</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Machine learning powered</div>
+            </div>
+            <div>
+              <div class="lb-acc">88.5%</div>
+              <div class="lb-trades">31 trades</div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank lbr-3">3</div>
+            <div>
+              <div class="lb-name">⏱️ Multi Timeframe</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Confluence based</div>
+            </div>
+            <div>
+              <div class="lb-acc">82.3%</div>
+              <div class="lb-trades">28 trades</div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank lbr-n">4</div>
+            <div>
+              <div class="lb-name">🔬 Market Microstructure</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Order flow analysis</div>
+            </div>
+            <div>
+              <div class="lb-acc">79.1%</div>
+              <div class="lb-trades">22 trades</div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank lbr-n">5</div>
+            <div>
+              <div class="lb-name">⚡ Ultimate Fusion</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Master signal combiner</div>
+            </div>
+            <div>
+              <div class="lb-acc">74.8%</div>
+              <div class="lb-trades">18 trades</div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank lbr-n">6</div>
+            <div>
+              <div class="lb-name">🔗 Pair Correlation</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Relative strength</div>
+            </div>
+            <div>
+              <div class="lb-acc">71.6%</div>
+              <div class="lb-trades">14 trades</div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank lbr-n">7</div>
+            <div>
+              <div class="lb-name">📅 Seasonality Cycle</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Calendar-based patterns</div>
+            </div>
+            <div>
+              <div class="lb-acc">68.9%</div>
+              <div class="lb-trades">10 trades</div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank lbr-n">8</div>
+            <div>
+              <div class="lb-name">🌪️ Volatility Squeeze</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Breakout specialist</div>
+            </div>
+            <div>
+              <div class="lb-acc">65.2%</div>
+              <div class="lb-trades">17 trades</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-prog" style="margin-top:10px;">
+          <div class="mini-prog-label">
+            <span>MONTHLY TARGET</span>
+            <span style="color:var(--ultra)">76%</span>
+          </div>
+          <div class="mini-prog-bar"><div class="mini-prog-fill" style="width:76%"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">HOME</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">⚡</span>
+    <span class="nav-label">SIGNAL</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">👁️</span>
+    <span class="nav-label">WATCH</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">POWER</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">ADMIN</span>
+  </div>
+</div>
+
+<script>
+  function showDetail(id) {
+    document.getElementById('overviewSection').style.display = 'none';
+    const all = document.querySelectorAll('.detail-panel');
+    all.forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('detail-' + id);
+    if (panel) panel.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goBack() {
+    const all = document.querySelectorAll('.detail-panel');
+    all.forEach(p => p.classList.remove('active'));
+    document.getElementById('overviewSection').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Animate score meter on load
+  window.addEventListener('load', () => {
+    const fill = document.querySelector('.meter-fill');
+    fill.style.width = '0%';
+    setTimeout(() => { fill.style.width = '78.5%'; }, 200);
+  });
+</script>
+</body>
+</html>

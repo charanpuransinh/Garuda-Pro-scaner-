@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ Expiry Scalp Scanner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+  :root{--bg:#030810;--panel:#070f1e;--border:#0d2040;--green:#00ff88;--red:#ff3355;--yellow:#ffcc00;--blue:#00aaff;--dim:#3a5070;--text:#c8dff5;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,170,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,170,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .wrap{position:relative;z-index:1;padding:10px;max-width:600px;margin:0 auto;}
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-top:2px solid var(--blue);border-radius:4px;margin-bottom:10px;}
+  .htitle{font-size:16px;font-weight:700;color:var(--blue);letter-spacing:2px;}
+  .htitle span{color:var(--yellow);}
+  .dot{width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block;margin-right:5px;animation:blink 1s infinite;}
+  @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--green);}50%{opacity:.3;}}
+  .tsub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);margin-top:2px;}
+  .input-box{background:var(--panel);border:1px solid var(--yellow);border-radius:4px;padding:12px 14px;margin-bottom:10px;}
+  .input-title{font-size:11px;color:var(--yellow);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .input-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .input-label{font-size:12px;color:var(--dim);width:70px;flex-shrink:0;}
+  .inp{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:14px;padding:6px 10px;border-radius:3px;outline:none;}
+  .inp:focus{border-color:var(--blue);}
+  .go-btn{width:100%;padding:9px;background:rgba(0,255,136,0.12);border:1px solid var(--green);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all .2s;}
+  .go-btn:hover{background:rgba(0,255,136,0.25);}
+  .idxrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+  .icard{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:10px 12px;position:relative;overflow:hidden;}
+  .icard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+  .icard.up::after{background:var(--green);}.icard.dn::after{background:var(--red);}
+  .iname{font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;}
+  .iprice{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;}
+  .ichg{font-size:12px;font-weight:600;}
+  .g{color:var(--green);}.r{color:var(--red);}
+  .sig-box{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+  .sig-lbl{font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+  .sig-val{font-size:20px;font-weight:700;letter-spacing:1px;padding:4px 14px;border-radius:3px;}
+  .sv-buy{background:rgba(0,255,136,.12);color:var(--green);border:1px solid var(--green);}
+  .sv-sell{background:rgba(255,51,85,.12);color:var(--red);border:1px solid var(--red);}
+  .sv-wait{background:rgba(255,204,0,.12);color:var(--yellow);border:1px solid var(--yellow);}
+  .sig-desc{font-size:13px;color:var(--text);flex:1;line-height:1.4;}
+  .tbar-panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin-bottom:10px;}
+  .tbar-title{font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+  .tbar-wrap{width:100%;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;margin-bottom:5px;}
+  .tbar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));transition:width .5s;}
+  .tzones{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);font-family:'Share Tech Mono',monospace;}
+  .tz-on{color:var(--yellow) !important;font-weight:700;}
+  .decay-row{display:flex;gap:8px;align-items:center;margin-top:6px;}
+  .decay-lbl{font-size:10px;color:var(--dim);width:75px;}
+  .dbar-wrap{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;}
+  .dbar{height:100%;border-radius:3px;background:var(--red);}
+  .dval{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--red);width:32px;text-align:right;}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+  .pnl{background:var(--panel);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+  .pnl-hdr{padding:7px 12px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);border-bottom:1px solid var(--border);background:rgba(0,170,255,.05);font-weight:600;}
+  .pnl-body{padding:8px 12px;}
+  .lv-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .lv-row:last-child{border-bottom:none;}
+  .lv-name{color:var(--dim);font-size:10px;letter-spacing:1px;}
+  .lv-num{font-family:'Share Tech Mono',monospace;font-weight:700;}
+  .lv-res{color:var(--red);}.lv-sup{color:var(--green);}.lv-atm{color:var(--yellow);}
+  .lv-dist{font-size:9px;color:var(--dim);font-family:'Share Tech Mono',monospace;}
+  .setup-row{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .setup-row:last-child{border-bottom:none;}
+  .setup-title{font-weight:700;margin-bottom:2px;}
+  .setup-detail{font-size:11px;color:var(--dim);line-height:1.4;}
+  .tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:2px;margin-right:4px;font-weight:700;letter-spacing:1px;}
+  .t-sell{background:rgba(255,51,85,.2);color:var(--red);border:1px solid var(--red);}
+  .t-buy{background:rgba(0,255,136,.2);color:var(--green);border:1px solid var(--green);}
+  .t-wait{background:rgba(255,204,0,.2);color:var(--yellow);border:1px solid var(--yellow);}
+  .mp-val{font-family:'Share Tech Mono',monospace;font-size:26px;color:var(--yellow);font-weight:700;text-align:center;padding:8px 0 2px;}
+  .mp-sub{text-align:center;font-size:11px;color:var(--dim);padding-bottom:6px;line-height:1.5;}
+  .oi-table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:11px;}
+  .oi-table th{color:var(--dim);font-size:9px;letter-spacing:1px;padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;}
+  .oi-table td{padding:5px 6px;text-align:center;border-bottom:1px solid rgba(13,32,64,.5);}
+  .oi-table tr.atm-row{background:rgba(255,204,0,.06);}
+  .coi{color:var(--green);}.poi{color:var(--red);}
+  .cltp{color:var(--green);font-size:12px;}.pltp{color:var(--red);font-size:12px;}
+  .strike-cell{color:var(--yellow);font-weight:700;font-size:13px;}
+  .auto-btn{display:block;width:100%;padding:9px;background:rgba(0,170,255,.1);border:1px solid var(--blue);color:var(--blue);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:4px;margin-bottom:10px;}
+  .note{font-size:10px;color:var(--dim);text-align:center;padding:8px 0 16px;}
+  @media(max-width:420px){.twocol{grid-template-columns:1fr;}.idxrow{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hdr">
+    <div>
+      <div class="htitle"><span class="dot"></span>⚡ <span>EXPIRY</span> SCALP SCANNER</div>
+      <div class="tsub" id="lastUpd">Ready — price डालो या Auto Fetch करो</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:10px;color:var(--dim);letter-spacing:1px">EXPIRY</div>
+      <div style="font-size:13px;color:var(--yellow);font-weight:700">TODAY</div>
+    </div>
+  </div>
+
+  <!-- MANUAL INPUT -->
+  <div class="input-box">
+    <div class="input-title">📥 Price डालो → Instant Signal</div>
+    <div class="input-row">
+      <span class="input-label">SENSEX</span>
+      <input class="inp" id="inSensex" type="number" placeholder="75521" value="75521">
+    </div>
+    <div class="input-row">
+      <span class="input-label">NIFTY</span>
+      <input class="inp" id="inNifty" type="number" placeholder="23722" value="23722">
+    </div>
+    <div class="input-row">
+      <span class="input-label">Change %</span>
+      <input class="inp" id="inChg" type="number" placeholder="1.22" value="1.22" step="0.01">
+    </div>
+    <button class="go-btn" onclick="runScanner()">⚡ SCAN NOW</button>
+  </div>
+
+  <button class="auto-btn" id="autoBtn" onclick="tryAutoFetch()">🌐 AUTO FETCH LIVE PRICE</button>
+
+  <!-- INDEX CARDS -->
+  <div class="idxrow">
+    <div class="icard up" id="nCard">
+      <div class="iname">NIFTY 50</div>
+      <div class="iprice g" id="nPrice">23,722</div>
+      <div class="ichg" id="nChg"><span class="g">+1.22%</span></div>
+    </div>
+    <div class="icard up" id="sCard">
+      <div class="iname">SENSEX</div>
+      <div class="iprice g" id="sPrice">75,521</div>
+      <div class="ichg" id="sChg"><span class="g">+1.22%</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN SIGNAL -->
+  <div class="sig-box">
+    <div>
+      <div class="sig-lbl">Signal</div>
+      <div class="sig-val sv-sell" id="mainSig">SELL CE</div>
+    </div>
+    <div class="sig-desc" id="mainDesc">Loading signal...</div>
+  </div>
+
+  <!-- TIME BAR -->
+  <div class="tbar-panel">
+    <div class="tbar-title">⏱ EXPIRY SESSION TRACKER</div>
+    <div class="tbar-wrap"><div class="tbar-fill" id="tFill" style="width:0%"></div></div>
+    <div class="tzones">
+      <span id="tz1">9:15</span><span id="tz2">10:00</span>
+      <span id="tz3">12:00★</span><span id="tz4">2:00</span><span id="tz5">3:30</span>
+    </div>
+    <div class="decay-row">
+      <span class="decay-lbl">DECAY RATE</span>
+      <div class="dbar-wrap"><div class="dbar" id="dBar" style="width:0%"></div></div>
+      <span class="dval" id="dVal">0%</span>
+    </div>
+  </div>
+
+  <!-- OI TABLE from screenshots -->
+  <div class="pnl" style="margin-bottom:10px">
+    <div class="pnl-hdr">📊 SENSEX OPTION CHAIN (1:09 IST Data)</div>
+    <div class="pnl-body" style="padding:0;overflow-x:auto">
+      <table class="oi-table">
+        <thead><tr><th>CALL OI</th><th>CALL LTP</th><th>STRIKE</th><th>PUT LTP</th><th>PUT OI</th></tr></thead>
+        <tbody>
+          <tr><td class="coi">--</td><td class="cltp">₹477.50</td><td class="strike-cell">75100</td><td class="pltp">₹35.50</td><td class="poi">8.84Cr</td></tr>
+          <tr><td class="coi">6.07L</td><td class="cltp">₹392.55</td><td class="strike-cell">75200</td><td class="pltp">₹47.05</td><td class="poi">36.61L</td></tr>
+          <tr><td class="coi">9.12L</td><td class="cltp">₹313.10</td><td class="strike-cell">75300</td><td class="pltp">₹69.15</td><td class="poi">36.88L</td></tr>
+          <tr style="background:rgba(255,204,0,.06)"><td class="coi">16.51L</td><td class="cltp">₹239.90</td><td class="strike-cell">75400 🔴</td><td class="pltp">₹98.60</td><td class="poi" style="color:var(--yellow);font-weight:700">39.59L★</td></tr>
+          <tr class="atm-row"><td class="coi">34.88L</td><td class="cltp">₹179.95</td><td class="strike-cell" style="color:var(--blue)">75500▶ATM</td><td class="pltp">₹133.25</td><td class="poi">35.44L</td></tr>
+          <tr><td class="coi">27.32L</td><td class="cltp">₹130.10</td><td class="strike-cell">75600</td><td class="pltp">₹190.55</td><td class="poi">14.76L</td></tr>
+          <tr><td class="coi">29.21L</td><td class="cltp">₹92.60</td><td class="strike-cell">75700</td><td class="pltp">₹256.40</td><td class="poi">5.60L</td></tr>
+          <tr><td class="coi">35.01L</td><td class="cltp">₹64.60</td><td class="strike-cell">75800</td><td class="pltp">₹319.25</td><td class="poi">--</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEVELS + MAX PAIN -->
+  <div class="twocol">
+    <div class="pnl">
+      <div class="pnl-hdr">🎯 KEY LEVELS</div>
+      <div class="pnl-body" id="levelsDiv"></div>
+    </div>
+    <div class="pnl">
+      <div class="pnl-hdr">💀 MAX PAIN</div>
+      <div class="pnl-body">
+        <div class="mp-val" id="mpVal">75,400</div>
+        <div class="mp-sub" id="mpSub">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUPS -->
+  <div class="pnl" style="margin:10px 0">
+    <div class="pnl-hdr">⚡ LIVE SCALP SETUPS</div>
+    <div class="pnl-body" id="setupsDiv"></div>
+  </div>
+
+  <div class="note">SENSEX Option Chain: 1:09 IST screenshot data | Yahoo Finance auto-fetch | Not financial advice</div>
+</div>
+
+<script>
+// ── LEVELS ──
+function renderLevels(spot) {
+  const atm = Math.round(spot/100)*100;
+  const lv = [{n:'R3',v:atm+300,c:'lv-res'},{n:'R2',v:atm+200,c:'lv-res'},{n:'R1',v:atm+100,c:'lv-res'},{n:'▶ATM',v:atm,c:'lv-atm'},{n:'S1',v:atm-100,c:'lv-sup'},{n:'S2',v:atm-200,c:'lv-sup'},{n:'S3',v:atm-300,c:'lv-sup'}];
+  let h='';
+  lv.forEach(l=>{
+    const d=(spot-l.v).toFixed(0);
+    h+=`<div class="lv-row"><span class="lv-name">${l.n}</span><span class="lv-num ${l.c}">${l.v.toLocaleString('en-IN')}</span><span class="lv-dist">${d>0?'+'+d:d}</span></div>`;
+  });
+  document.getElementById('levelsDiv').innerHTML=h;
+  return {atm,r1:atm+100,r2:atm+200,s1:atm-100,s2:atm-200};
+}
+
+// ── MAX PAIN ──
+function renderMaxPain(spot) {
+  const mp=75400; // from screenshot: 75400 PE = 39.59L (+4065%)
+  const diff=(spot-mp).toFixed(0);
+  const dir=spot>mp?`▼ ${diff} pts above MaxPain — bearish pull`:`▲ ${Math.abs(diff)} pts below MaxPain — bullish`;
+  document.getElementById('mpVal').textContent=mp.toLocaleString('en-IN');
+  document.getElementById('mpSub').textContent=dir+'\nMarket likely expires near 75400';
+  return mp;
+}
+
+// ── SIGNAL ──
+function updateSignal(spot,chgPct,atm) {
+  const el=document.getElementById('mainSig');
+  const desc=document.getElementById('mainDesc');
+  const putWall=75400, callWall=75600; // from OI data
+  if(spot>callWall){
+    el.className='sig-val sv-sell';el.textContent='SELL CE';
+    desc.textContent=`Price ${(spot-callWall).toFixed(0)} pts above call wall ${callWall}। 75700-75800 CE sell करो। Premium fast decay। SL tight रखो।`;
+  } else if(spot>=putWall&&spot<=callWall){
+    el.className='sig-val sv-sell';el.textContent='SELL BOTH';
+    desc.textContent=`Price ${putWall}-${callWall} zone में। BEST ZONE: 75400PE + 75700CE दोनों sell। Max pain 75400 पर। दोनों तरफ premium crush।`;
+  } else if(spot<putWall){
+    el.className='sig-val sv-buy';el.textContent='BUY CE';
+    desc.textContent=`Price below put wall। Bounce expected। ATM CE quick scalp। SL: 10 pts।`;
+  } else {
+    el.className='sig-val sv-wait';el.textContent='WATCH';
+    desc.textContent=`ATM zone। Wait for direction।`;
+  }
+}
+
+// ── SETUPS ──
+function renderSetups(spot,chgPct,tz) {
+  const setups=[];
+  if(tz>=3){
+    setups.push({tag:'⭐SELL',cls:'t-sell',title:'Straddle Sell @ 75500 (Best Window)',detail:'12PM+ zone। 75500CE (₹180) + 75500PE (₹133) दोनों sell। Total premium ₹313। Target: ₹250 (₹63 profit)। SL: 15 pts either side।'});
+  }
+  setups.push({tag:'SELL',cls:'t-sell',title:'75700 CE Sell (OTM Call Wall)',detail:`Entry: अभी। LTP ~₹92। Target: ₹70-75 (15-20 pts decay)। SL: ₹108। Expiry में fast time decay।`});
+  setups.push({tag:'SELL',cls:'t-sell',title:'75300 PE Sell (Put Wall Support)',detail:'75300-75400 पर massive Put OI = strong floor। PE sell। LTP ~₹69। Target: ₹45-50। SL: ₹88।'});
+  if(spot>75500){
+    setups.push({tag:'SELL',cls:'t-sell',title:'75600 CE Sell (Near ATM)',detail:`Price 75500+ है। 75600CE sell। LTP ~₹130। Target: ₹105-110। SL: ₹150। Quick 20-25 pts scalp।`});
+  } else {
+    setups.push({tag:'BUY',cls:'t-buy',title:'75600 CE Buy (Momentum Scalp)',detail:'अगर price 75550+ hold करे। LTP ~₹130। Target: ₹155-160। SL: ₹115। Fast exit।'});
+  }
+  let h='';
+  setups.forEach(s=>{
+    h+=`<div class="setup-row"><div class="setup-title"><span class="tag ${s.cls}">${s.tag}</span>${s.title}</div><div class="setup-detail">${s.detail}</div></div>`;
+  });
+  document.getElementById('setupsDiv').innerHTML=h;
+}
+
+// ── TIME ZONE ──
+function getTimeZone() {
+  const now=new Date();
+  const ist=new Date(now.toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  const h=ist.getHours(),m=ist.getMinutes();
+  const total=(15*60+30)-(9*60+15);
+  const elapsed=(h*60+m)-(9*60+15);
+  const pct=Math.min(100,Math.max(0,elapsed/total*100));
+  document.getElementById('tFill').style.width=pct+'%';
+  const dp=Math.min(100,pct*1.5);
+  document.getElementById('dBar').style.width=dp+'%';
+  document.getElementById('dVal').textContent=dp.toFixed(0)+'%';
+  ['tz1','tz2','tz3','tz4','tz5'].forEach(id=>document.getElementById(id).className='');
+  const t=h*60+m;let zone=0;
+  if(t>=9*60+15&&t<10*60){document.getElementById('tz1').className='tz-on';zone=1;}
+  if(t>=10*60&&t<12*60){document.getElementById('tz2').className='tz-on';zone=2;}
+  if(t>=12*60&&t<14*60){document.getElementById('tz3').className='tz-on';zone=3;}
+  if(t>=14*60&&t<15*60+30){document.getElementById('tz4').className='tz-on';zone=4;}
+  return zone;
+}
+
+// ── RUN SCANNER ──
+function runScanner() {
+  const spot=parseFloat(document.getElementById('inSensex').value)||75521;
+  const nifty=parseFloat(document.getElementById('inNifty').value)||23722;
+  const chgPct=parseFloat(document.getElementById('inChg').value)||1.22;
+  document.getElementById('nPrice').textContent=nifty.toLocaleString('en-IN',{minimumFractionDigits:2});
+  document.getElementById('sPrice').textContent=spot.toLocaleString('en-IN',{minimumFractionDigits:2});
+  const sign=chgPct>=0?'+':'';
+  document.getElementById('nChg').innerHTML=`<span class="${chgPct>=0?'g':'r'}">${sign}${chgPct.toFixed(2)}%</span>`;
+  document.getElementById('sChg').innerHTML=`<span class="${chgPct>=0?'g':'r'}">${sign}${chgPct.toFixed(2)}%</span>`;
+  document.getElementById('nCard').className=`icard ${chgPct>=0?'up':'dn'}`;
+  document.getElementById('sCard').className=`icard ${chgPct>=0?'up':'dn'}`;
+  const tz=getTimeZone();
+  const {atm}=renderLevels(spot);
+  renderMaxPain(spot);
+  updateSignal(spot,chgPct,atm);
+  renderSetups(spot,chgPct,tz);
+  const now=new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'});
+  document.getElementById('lastUpd').textContent=`Scanned: ${now} IST`;
+}
+
+// ── AUTO FETCH ──
+async function tryAutoFetch() {
+  const btn=document.getElementById('autoBtn');
+  btn.textContent='⟳ Fetching...';btn.disabled=true;
+  const apis=[
+    async()=>{
+      const u='https://query1.finance.yahoo.com/v8/finance/chart/%5EBSESN?interval=1m&range=1d';
+      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(u),{signal:AbortSignal.timeout(8000)});
+      const d=await r.json();
+      const m=d.chart.result[0].meta;
+      const nu=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/%5ENSIC?interval=1m&range=1d'),{signal:AbortSignal.timeout(8000)});
+      const nd=await nu.json();
+      const nm=nd.chart.result[0].meta;
+      return{spot:m.regularMarketPrice,prev:m.chartPreviousClose,nifty:nm.regularMarketPrice};
+    },
+    async()=>{
+      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://query2.finance.yahoo.com/v8/finance/chart/%5EBSESN?interval=1m&range=1d'),{signal:AbortSignal.timeout(8000)});
+      const d=await r.json();
+      const m=d.chart.result[0].meta;
+      return{spot:m.regularMarketPrice,prev:m.chartPreviousClose,nifty:null};
+    }
+  ];
+  let ok=false;
+  for(const api of apis){
+    try{
+      const{spot,prev,nifty}=await api();
+      if(spot&&spot>50000){
+        const chg=((spot-prev)/prev*100);
+        document.getElementById('inSensex').value=spot.toFixed(2);
+        document.getElementById('inChg').value=chg.toFixed(2);
+        if(nifty)document.getElementById('inNifty').value=nifty.toFixed(2);
+        runScanner();
+        btn.textContent='✅ Live Data!';ok=true;break;
+      }
+    }catch(e){console.log('API err:',e.message);}
+  }
+  if(!ok){btn.textContent='❌ Failed — Manual Enter करो';runScanner();}
+  setTimeout(()=>{btn.textContent='🌐 AUTO FETCH LIVE PRICE';btn.disabled=false;},4000);
+}
+
+// ── INIT ──
+runScanner();
+getTimeZone();
+setInterval(()=>{tryAutoFetch();},60000);
+</script>
+</body>
+</html>
