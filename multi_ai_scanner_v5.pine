@@ -1,0 +1,860 @@
+// ═════════════════════════════════════════════════════════════════════════════
+// MULTI-AI STRATEGY SCANNER v5.0
+// 45 Self-Contained Indicators | 3 AI Personas | Dark Mobile UI
+// No Options | No Expiry | Pure Equity + Index Intraday
+// Trailing Stop Loss Mandatory | High Accuracy Focus
+// ═════════════════════════════════════════════════════════════════════════════
+//@version=5
+indicator("Multi-AI Strategy Scanner v5.0", shorttitle="AI-SCAN", overlay=false, max_lines_count=500, max_labels_count=500, max_bars_back=500)
+
+// ═════════════════════════════════════════════════════════════════════════════
+// GLOBAL SETTINGS & INPUTS
+// ═════════════════════════════════════════════════════════════════════════════
+grpGlobal = "══════════ GLOBAL SETTINGS ══════════"
+aiPage    = input.int(1, "AI Page", minval=1, maxval=3, group=grpGlobal)
+showAll   = input.bool(false, "Show All Indicators (Override Page)", group=grpGlobal)
+tfIntra   = input.timeframe("15", "Intraday Timeframe", group=grpGlobal)
+trailPct  = input.float(1.5, "Trailing Stop Loss %", minval=0.1, step=0.1, group=grpGlobal)
+
+grpUI = "══════════ DARK MOBILE UI ══════════"
+uiScale   = input.float(1.0, "UI Scale", minval=0.5, maxval=2.0, step=0.1, group=grpUI)
+panelX    = input.int(10, "Panel X", group=grpUI)
+panelY    = input.int(10, "Panel Y", group=grpUI)
+
+// ═════════════════════════════════════════════════════════════════════════════
+// COLOR PALETTE (Dark Mobile Theme)
+// ═════════════════════════════════════════════════════════════════════════════
+color C_BG        = color.new(#0d1117, 0)
+color C_PANEL     = color.new(#161b22, 10)
+color C_BORDER    = color.new(#30363d, 0)
+color C_TEXT      = color.new(#c9d1d9, 0)
+color C_TEXT_DIM  = color.new(#8b949e, 0)
+color C_BULL      = color.new(#10a37f, 0)   // ChatGPT Green
+color C_BEAR      = color.new(#f85149, 0)
+color C_NEUTRAL   = color.new(#58a6ff, 0)
+color C_GEMINI    = color.new(#4285f4, 0)   // Gemini Blue
+color C_KIMI      = color.new(#ff6b35, 0)   // Kimi Orange
+color C_WARN      = color.new(#d29922, 0)
+
+// ═════════════════════════════════════════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ═════════════════════════════════════════════════════════════════════════════
+f_ema(src, len) => ta.ema(src, len)
+f_sma(src, len) => ta.sma(src, len)
+f_rsi(src, len) => ta.rsi(src, len)
+f_stdev(src, len) => ta.stdev(src, len)
+f_bb(src, len, mult) => [ta.sma(src, len), ta.sma(src, len) + mult * ta.stdev(src, len), ta.sma(src, len) - mult * ta.stdev(src, len)]
+f_atr(len) => ta.atr(len)
+f_hhv(src, len) => ta.highest(src, len)
+f_llv(src, len) => ta.lowest(src, len)
+
+// ═════════════════════════════════════════════════════════════════════════════
+// TRAILING STOP LOSS ENGINE (Mandatory - All Strategies)
+// ═════════════════════════════════════════════════════════════════════════════
+var float trailStop = na
+var float highestHigh = na
+var float lowestLow = na
+
+f_trailLong(entryPrice, currentClose) =>
+    highestHigh := math.max(nz(highestHigh), currentClose)
+    trailPrice := highestHigh * (1 - trailPct / 100)
+    trailStop := nz(trailStop) == 0 ? entryPrice * (1 - trailPct / 100) : math.max(trailStop, trailPrice)
+    trailStop
+
+f_trailShort(entryPrice, currentClose) =>
+    lowestLow := math.min(nz(lowestLow), currentClose)
+    trailPrice := lowestLow * (1 + trailPct / 100)
+    trailStop := nz(trailStop) == 0 ? entryPrice * (1 + trailPct / 100) : math.min(trailStop, trailPrice)
+    trailStop
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SIGNAL DISPLAY HELPER
+// ═════════════════════════════════════════════════════════════════════════════
+var table signalTable = table.new(position.top_right, 2, 50, bgcolor=C_PANEL, border_width=1, border_color=C_BORDER, frame_width=1)
+
+f_displaySignal(row, name, signal, colorUp, colorDown, colorNeutral) =>
+    sigColor = signal == 1 ? colorUp : signal == -1 ? colorDown : colorNeutral
+    sigText  = signal == 1 ? "▲ LONG" : signal == -1 ? "▼ SHORT" : "— NEUTRAL"
+    table.cell(signalTable, 0, row, name, text_color=C_TEXT_DIM, text_size=size.small)
+    table.cell(signalTable, 1, row, sigText, text_color=sigColor, text_size=size.small)
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+// PAGE 1: CHATGPT 🤖 — ML/AI + ORDER FLOW + VOLUME (15 Indicators)
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+
+showChatGPT = aiPage == 1 or showAll
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.1 Temporal Fusion Transformer Signal (ML/AI)
+// ───────────────────────────────────────────────────────────────────────────
+grpGPT1 = "🤖 CHATGPT — ML/AI Indicators"
+tftLen    = input.int(14, "TFT Lookback", minval=5, maxval=50, group=grpGPT1)
+tftFast   = input.int(8, "TFT Fast EMA", minval=3, maxval=20, group=grpGPT1)
+tftSlow   = input.int(21, "TFT Slow EMA", minval=10, maxval=50, group=grpGPT1)
+
+tftFastEma = f_ema(close, tftFast)
+tftSlowEma = f_ema(close, tftSlow)
+tftTrend   = tftFastEma - tftSlowEma
+tftVol     = f_stdev(close, tftLen)
+tftSignal  = tftTrend > tftVol * 0.5 ? 1 : tftTrend < -tftVol * 0.5 ? -1 : 0
+plot(showChatGPT ? tftSignal : na, "TFT Signal", color=C_BULL, style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.2 XGBoost Signal Engine (ML/AI)
+// ───────────────────────────────────────────────────────────────────────────
+xgbLen   = input.int(10, "XGB Lookback", minval=5, maxval=30, group=grpGPT1)
+xgbFeat1 = ta.change(close, 1) / close[1] * 100
+xgbFeat2 = ta.change(volume, 1) / volume[1] * 100
+xgbFeat3 = (close - f_sma(close, xgbLen)) / f_stdev(close, xgbLen)
+xgbScore = xgbFeat1 * 0.4 + xgbFeat2 * 0.2 + xgbFeat3 * 0.4
+xgbSignal = xgbScore > 1.0 ? 1 : xgbScore < -1.0 ? -1 : 0
+plot(showChatGPT ? xgbSignal : na, "XGB Signal", color=color.new(C_BULL, 20), style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.3 LightGBM Alpha Factor (ML/AI)
+// ───────────────────────────────────────────────────────────────────────────
+lgbLen  = input.int(20, "LGB Lookback", minval=10, maxval=50, group=grpGPT1)
+lgbMom  = close - close[lgbLen]
+lgbVol  = ta.tr(true)
+lgbVolAvg = f_sma(lgbVol, lgbLen)
+lgbAlpha = lgbMom / (lgbVolAvg * math.sqrt(lgbLen))
+lgbSignal = lgbAlpha > 0.5 ? 1 : lgbAlpha < -0.5 ? -1 : 0
+plot(showChatGPT ? lgbSignal : na, "LGB Alpha", color=color.new(C_BULL, 40), style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.4 Random Forest Regime Classifier (ML/AI)
+// ───────────────────────────────────────────────────────────────────────────
+rfLen   = input.int(14, "RF Lookback", minval=7, maxval=30, group=grpGPT1)
+rfRsi   = f_rsi(close, rfLen)
+rfAdx   = ta.adx(rfLen)
+rfTrend = close > f_ema(close, rfLen) ? 1 : -1
+rfVol   = f_stdev(close, rfLen) / f_sma(close, rfLen) * 100
+rfRegime = rfRsi > 50 and rfAdx > 25 and rfTrend == 1 ? 1 : rfRsi < 50 and rfAdx > 25 and rfTrend == -1 ? -1 : 0
+plot(showChatGPT ? rfRegime : na, "RF Regime", color=color.new(C_BULL, 60), style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.5 Neural Network Oscillator (ML/AI)
+// ───────────────────────────────────────────────────────────────────────────
+nnLen   = input.int(14, "NN Lookback", minval=5, maxval=30, group=grpGPT1)
+nnW1    = math.sin(close / f_sma(close, nnLen)) * 0.5 + 0.5
+nnW2    = math.cos(volume / f_sma(volume, nnLen)) * 0.5 + 0.5
+nnW3    = math.tanh(ta.change(close, 1) / f_stdev(close, nnLen))
+nnOsc   = (nnW1 * 0.4 + nnW2 * 0.3 + nnW3 * 0.3) * 100 - 50
+nnSignal = nnOsc > 20 ? 1 : nnOsc < -20 ? -1 : 0
+plot(showChatGPT ? nnOsc : na, "NN Oscillator", color=C_BULL, style=plot.style_line)
+hline(20, "NN Upper", color=color.new(C_BULL, 80))
+hline(-20, "NN Lower", color=color.new(C_BEAR, 80))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.6 Order Flow Imbalance (OFI) (Order Flow)
+// ───────────────────────────────────────────────────────────────────────────
+grpGPT2 = "🤖 CHATGPT — Order Flow Indicators"
+ofiLen  = input.int(14, "OFI Lookback", minval=5, maxval=30, group=grpGPT2)
+
+// Approximate OFI using price-volume relationship
+ofiDelta = close > open ? volume : close < open ? -volume : 0
+ofiCum   = ta.cum(ofiDelta)
+ofiAvg   = f_sma(ofiCum, ofiLen)
+ofiDev   = f_stdev(ofiCum, ofiLen)
+ofiZ     = (ofiCum - ofiAvg) / (ofiDev + 0.0001)
+ofiSignal = ofiZ > 2.0 ? 1 : ofiZ < -2.0 ? -1 : 0
+plot(showChatGPT ? ofiZ : na, "OFI Z-Score", color=C_BULL, style=plot.style_line)
+hline(2, "OFI +2σ", color=color.new(C_BULL, 70))
+hline(-2, "OFI -2σ", color=color.new(C_BEAR, 70))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.7 Stacked Imbalance Detector (Order Flow)
+// ───────────────────────────────────────────────────────────────────────────
+stkLen  = input.int(5, "Stacked Imbalance Bars", minval=3, maxval=10, group=grpGPT2)
+stkUp   = 0
+stkDn   = 0
+for i = 0 to stkLen - 1
+    stkUp := close[i] > open[i] ? stkUp + 1 : stkUp
+    stkDn := close[i] < open[i] ? stkDn + 1 : stkDn
+stkSignal = stkUp == stkLen ? 1 : stkDn == stkLen ? -1 : 0
+plot(showChatGPT ? stkSignal : na, "Stacked Imbalance", color=color.new(C_BULL, 30), style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.8 Delta Profile (Order Flow)
+// ───────────────────────────────────────────────────────────────────────────
+deltaLen = input.int(14, "Delta Lookback", minval=5, maxval=30, group=grpGPT2)
+deltaUp  = close > open ? (high - low) * volume : 0
+deltaDn  = close < open ? (high - low) * volume : 0
+deltaNet = ta.cum(deltaUp - deltaDn)
+deltaAvg = f_sma(deltaNet, deltaLen)
+deltaSig = deltaNet > deltaAvg * 1.5 ? 1 : deltaNet < deltaAvg * 0.5 ? -1 : 0
+plot(showChatGPT ? deltaNet : na, "Delta Profile", color=C_BULL, style=plot.style_histogram)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.9 Absorption Zone Detector (Order Flow)
+// ───────────────────────────────────────────────────────────────────────────
+absLen  = input.int(20, "Absorption Lookback", minval=10, maxval=50, group=grpGPT2)
+absVol  = f_sma(volume, absLen)
+absPrice = f_sma(close, absLen)
+absZone = volume > absVol * 2.0 and math.abs(close - open) < (high - low) * 0.3 ? 1 : 0
+absSignal = absZone == 1 and close > absPrice ? 1 : absZone == 1 and close < absPrice ? -1 : 0
+plot(showChatGPT ? absSignal : na, "Absorption Zone", color=color.new(C_BULL, 50), style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.10 Market Speed Indicator (Order Flow)
+// ───────────────────────────────────────────────────────────────────────────
+spdLen  = input.int(10, "Speed Lookback", minval=5, maxval=20, group=grpGPT2)
+spdPrice = math.abs(ta.change(close, 1))
+spdVol   = volume
+spdRatio = spdPrice / (spdVol + 1) * 1000000
+spdAvg   = f_sma(spdRatio, spdLen)
+spdSignal = spdRatio > spdAvg * 2.0 ? 1 : spdRatio < spdAvg * 0.5 ? -1 : 0
+plot(showChatGPT ? spdRatio : na, "Market Speed", color=C_BULL, style=plot.style_line)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.11 Klinger Volume Oscillator (Volume)
+// ───────────────────────────────────────────────────────────────────────────
+grpGPT3 = "🤖 CHATGPT — Volume Indicators"
+kvoFast = input.int(34, "KVO Fast", minval=10, maxval=50, group=grpGPT3)
+kvoSlow = input.int(55, "KVO Slow", minval=20, maxval=100, group=grpGPT3)
+kvoSig  = input.int(13, "KVO Signal", minval=5, maxval=30, group=grpGPT3)
+
+kvoTrend = (high + low + close) / 3
+kvoDm   = kvoTrend - kvoTrend[1]
+kvoCm   = kvoDm == kvoDm[1] ? kvoCm[1] + kvoDm : kvoDm
+kvoVol  = volume * math.abs(2 * kvoDm - kvoCm) / (kvoCm + 0.0001) * ta.sign(kvoDm)
+kvoFastEma = f_ema(kvoVol, kvoFast)
+kvoSlowEma = f_ema(kvoVol, kvoSlow)
+kvoVal  = kvoFastEma - kvoSlowEma
+kvoSignalLine = f_ema(kvoVal, kvoSig)
+kvoSignal = kvoVal > kvoSignalLine and kvoVal > 0 ? 1 : kvoVal < kvoSignalLine and kvoVal < 0 ? -1 : 0
+plot(showChatGPT ? kvoVal : na, "KVO", color=C_BULL)
+plot(showChatGPT ? kvoSignalLine : na, "KVO Signal", color=color.new(C_TEXT_DIM, 0))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.12 Elder Force Index (Volume)
+// ───────────────────────────────────────────────────────────────────────────
+efiLen  = input.int(13, "EFI EMA Length", minval=5, maxval=30, group=grpGPT3)
+efiRaw  = (close - close[1]) * volume
+efiVal  = f_ema(efiRaw, efiLen)
+efiSignal = efiVal > 0 and efiVal > efiVal[1] ? 1 : efiVal < 0 and efiVal < efiVal[1] ? -1 : 0
+plot(showChatGPT ? efiVal : na, "EFI", color=C_BULL, style=plot.style_histogram)
+hline(0, "EFI Zero", color=C_TEXT_DIM)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.13 Volume Weighted RSI (Volume/RSI)
+// ───────────────────────────────────────────────────────────────────────────
+vwrsiLen = input.int(14, "VW-RSI Length", minval=5, maxval=30, group=grpGPT3)
+vwrsiUp  = close > close[1] ? (close - close[1]) * volume : 0
+vwrsiDn  = close < close[1] ? (close[1] - close) * volume : 0
+vwrsiAvgUp = f_sma(vwrsiUp, vwrsiLen)
+vwrsiAvgDn = f_sma(vwrsiDn, vwrsiLen)
+vwrsiVal = 100 - (100 / (1 + vwrsiAvgUp / (vwrsiAvgDn + 0.0001)))
+vwrsiSignal = vwrsiVal > 70 ? -1 : vwrsiVal < 30 ? 1 : 0
+plot(showChatGPT ? vwrsiVal : na, "VW-RSI", color=C_BULL)
+hline(70, "VW-RSI Overbought", color=C_BEAR)
+hline(30, "VW-RSI Oversold", color=C_BULL)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.14 OBV Enhanced (Volume)
+// ───────────────────────────────────────────────────────────────────────────
+obvLen  = input.int(20, "OBV EMA Length", minval=10, maxval=50, group=grpGPT3)
+obvRaw  = ta.cum(close > close[1] ? volume : close < close[1] ? -volume : 0)
+obvEma  = f_ema(obvRaw, obvLen)
+obvSignal = obvRaw > obvEma and obvRaw > obvRaw[1] ? 1 : obvRaw < obvEma and obvRaw < obvRaw[1] ? -1 : 0
+plot(showChatGPT ? obvRaw : na, "OBV", color=C_BULL)
+plot(showChatGPT ? obvEma : na, "OBV EMA", color=color.new(C_TEXT_DIM, 0))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 1.15 Effort vs Result (Wyckoff) (Volume)
+// ───────────────────────────────────────────────────────────────────────────
+evrLen  = input.int(20, "EvsR Lookback", minval=10, maxval=50, group=grpGPT3)
+evrSpr  = high - low
+evrEffort = volume / (evrSpr + 0.0001)
+evrResult = ta.change(close, 1)
+evrRatio = evrEffort / (math.abs(evrResult) + 0.0001)
+evrAvg  = f_sma(evrRatio, evrLen)
+evrSignal = evrRatio > evrAvg * 1.5 and evrResult > 0 ? 1 : evrRatio > evrAvg * 1.5 and evrResult < 0 ? -1 : 0
+plot(showChatGPT ? evrRatio : na, "Effort vs Result", color=C_BULL, style=plot.style_line)
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+// PAGE 2: GEMINI 💎 — EHLERS/DSP + MATH/STAT + MOVING AVERAGE + REGIME + VOLATILITY + TREND (15 Indicators)
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+
+showGemini = aiPage == 2 or showAll
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.1 Linear Predictive Filters (TASC Jan 2025) (Ehlers/DSP)
+// ───────────────────────────────────────────────────────────────────────────
+grpGEM1 = "💎 GEMINI — Ehlers/DSP Indicators"
+lpfLen  = input.int(14, "LPF Length", minval=5, maxval=50, group=grpGEM1)
+lpfA1   = 2.0 * math.cos(2 * math.pi / lpfLen)
+lpfA2   = -1.0
+lpfVal  = 0.0
+lpfVal := (lpfA1 * nz(lpfVal[1]) + lpfA2 * nz(lpfVal[2]) + close) / (lpfA1 + lpfA2 + 1)
+lpfSignal = lpfVal > lpfVal[1] and close > lpfVal ? 1 : lpfVal < lpfVal[1] and close < lpfVal ? -1 : 0
+plot(showGemini ? lpfVal : na, "LPF", color=C_GEMINI)
+plot(showGemini ? close : na, "Price", color=C_TEXT_DIM, style=plot.style_line)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.2 Autocorrelation Indicator (TASC Feb 2025) (Ehlers/DSP)
+// ───────────────────────────────────────────────────────────────────────────
+autoLen = input.int(14, "Autocorr Length", minval=5, maxval=50, group=grpGEM1)
+autoMean = f_sma(close, autoLen)
+autoNum = 0.0
+autoDen = 0.0
+for i = 0 to autoLen - 1
+    autoNum := autoNum + (close[i] - autoMean) * (close[i + autoLen] - autoMean)
+    autoDen := autoDen + math.pow(close[i] - autoMean, 2)
+autoCorr = autoNum / (autoDen + 0.0001)
+autoSignal = autoCorr > 0.5 ? 1 : autoCorr < -0.5 ? -1 : 0
+plot(showGemini ? autoCorr : na, "Autocorr", color=C_GEMINI, style=plot.style_histogram)
+hline(0.5, "Auto +0.5", color=color.new(C_BULL, 70))
+hline(-0.5, "Auto -0.5", color=color.new(C_BEAR, 70))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.3 Ultimate Channel and Bands (TASC May 2024) (Ehlers/DSP)
+// ───────────────────────────────────────────────────────────────────────────
+ucbLen  = input.int(20, "UCB Length", minval=10, maxval=50, group=grpGEM1)
+ucbDev  = input.float(2.0, "UCB Deviation", minval=0.5, maxval=4.0, step=0.1, group=grpGEM1)
+ucbMid  = f_ema(close, ucbLen)
+ucbStdev = f_stdev(close, ucbLen)
+ucbUpper = ucbMid + ucbDev * ucbStdev
+ucbLower = ucbMid - ucbDev * ucbStdev
+ucbSignal = close > ucbUpper ? 1 : close < ucbLower ? -1 : 0
+plot(showGemini ? ucbUpper : na, "UCB Upper", color=color.new(C_GEMINI, 50))
+plot(showGemini ? ucbLower : na, "UCB Lower", color=color.new(C_GEMINI, 50))
+plot(showGemini ? ucbMid : na, "UCB Mid", color=C_GEMINI)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.4 Dynamic ADX Histogram (TASC Dec 2024) (Ehlers/DSP)
+// ───────────────────────────────────────────────────────────────────────────
+dadxLen = input.int(14, "D-ADX Length", minval=5, maxval=30, group=grpGEM1)
+dadxAdx = ta.adx(dadxLen)
+dadxDiPlus = ta.di(dadxLen)
+dadxDiMinus = ta.di(dadxLen)
+dadxDyn = dadxAdx * (dadxDiPlus - dadxDiMinus) / 100
+dadxSignal = dadxDyn > 20 ? 1 : dadxDyn < -20 ? -1 : 0
+plot(showGemini ? dadxDyn : na, "D-ADX", color=C_GEMINI, style=plot.style_histogram)
+hline(20, "D-ADX +20", color=color.new(C_BULL, 70))
+hline(-20, "D-ADX -20", color=color.new(C_BEAR, 70))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.5 Dominant Cycle Detector (Ehlers/DSP)
+// ───────────────────────────────────────────────────────────────────────────
+dcLen   = input.int(20, "DC Lookback", minval=10, maxval=50, group=grpGEM1)
+dcSmooth = f_ema(close, 3)
+dcPeriod = 0.0
+dcPhase  = 0.0
+dcDelta  = dcSmooth - dcSmooth[2]
+dcInstPeriod = dcDelta == 0 ? dcPeriod[1] : 2 * math.pi / math.acos(1 - dcDelta * dcDelta / (2 * math.pow(dcSmooth - dcSmooth[1], 2) + 0.0001))
+dcPeriod := 0.5 * dcPeriod[1] + 0.5 * dcInstPeriod
+dcPeriod := math.min(math.max(dcPeriod, 6), 50)
+dcSignal = dcPeriod < dcPeriod[1] and close > f_ema(close, 10) ? 1 : dcPeriod > dcPeriod[1] and close < f_ema(close, 10) ? -1 : 0
+plot(showGemini ? dcPeriod : na, "Dominant Cycle", color=C_GEMINI, style=plot.style_line)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.6 Kalman Filter Smoother (Math/Stat)
+// ───────────────────────────────────────────────────────────────────────────
+grpGEM2 = "💎 GEMINI — Math/Stat Indicators"
+kfGain  = input.float(0.5, "KF Gain", minval=0.1, maxval=1.0, step=0.1, group=grpGEM2)
+kfEst   = 0.0
+kfErr   = 1.0
+kfPred  = nz(kfEst[1])
+kfErrPred = nz(kfErr[1]) + 0.01
+kfK     = kfErrPred / (kfErrPred + 0.1)
+kfEst   := kfPred + kfK * (close - kfPred)
+kfErr   := (1 - kfK) * kfErrPred
+kfSignal = kfEst > kfEst[1] ? 1 : kfEst < kfEst[1] ? -1 : 0
+plot(showGemini ? kfEst : na, "Kalman Filter", color=C_GEMINI)
+plot(showGemini ? close : na, "Price", color=color.new(C_TEXT_DIM, 80), style=plot.style_line)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.7 Ehlers Super Smoother (Ehlers/DSP)
+// ───────────────────────────────────────────────────────────────────────────
+essLen  = input.int(10, "ESS Length", minval=5, maxval=30, group=grpGEM1)
+essA1   = math.exp(-math.sqrt(2) * math.pi / essLen)
+essB1   = 2 * essA1 * math.cos(math.sqrt(2) * math.pi / essLen)
+essC1   = math.pow(essA1, 2)
+essVal  = 0.0
+essVal := essC1 * (close + 2 * close[1] + close[2]) / 4 + essB1 * nz(essVal[1]) - essC1 * nz(essVal[2])
+essSignal = essVal > essVal[1] ? 1 : essVal < essVal[1] ? -1 : 0
+plot(showGemini ? essVal : na, "Super Smoother", color=C_GEMINI, linewidth=2)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.8 Zero Lag TEMA System (Moving Average)
+// ───────────────────────────────────────────────────────────────────────────
+grpGEM3 = "💎 GEMINI — Moving Average Indicators"
+zltLen  = input.int(14, "ZLT Length", minval=5, maxval=50, group=grpGEM3)
+zltEma1 = f_ema(close, zltLen)
+zltEma2 = f_ema(zltEma1, zltLen)
+zltEma3 = f_ema(zltEma2, zltLen)
+zltLag  = zltEma1 - zltEma2
+zltVal  = zltEma1 + zltLag
+zltSignal = zltVal > zltVal[1] ? 1 : zltVal < zltVal[1] ? -1 : 0
+plot(showGemini ? zltVal : na, "ZLT", color=C_GEMINI, linewidth=2)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.9 McGinley Dynamic (Moving Average)
+// ───────────────────────────────────────────────────────────────────────────
+mgLen   = input.int(14, "McGinley Length", minval=5, maxval=50, group=grpGEM3)
+mgVal   = 0.0
+mgVal := nz(mgVal[1]) == 0 ? close : nz(mgVal[1]) + (close - nz(mgVal[1])) / (mgLen * math.pow(close / nz(mgVal[1]), 4))
+mgSignal = mgVal > mgVal[1] ? 1 : mgVal < mgVal[1] ? -1 : 0
+plot(showGemini ? mgVal : na, "McGinley", color=C_GEMINI)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.10 Jurik Moving Average (JMA) (Moving Average)
+// ───────────────────────────────────────────────────────────────────────────
+jmaLen  = input.int(14, "JMA Length", minval=5, maxval=50, group=grpGEM3)
+jmaPhase = input.int(0, "JMA Phase", minval=-100, maxval=100, group=grpGEM3)
+jmaBeta = 0.45 * (jmaLen - 1) / (0.45 * (jmaLen - 1) + 2)
+jmaAlpha = math.pow(jmaBeta, jmaPhase / 100 + 1)
+jmaVal  = 0.0
+jmaE0   = 0.0
+jmaE1   = 0.0
+jmaE2   = 0.0
+jmaE0 := close
+jmaE1 := jmaE0 + jmaAlpha * (close - jmaE0)
+jmaE2 := jmaE1 <= jmaE1[1] ? jmaE1 + jmaAlpha * (jmaE0 - jmaE1) : jmaE1 + jmaAlpha * (jmaE0 - jmaE1)
+jmaVal := jmaE2 + jmaAlpha * (jmaE2 - jmaVal[1])
+jmaSignal = jmaVal > jmaVal[1] ? 1 : jmaVal < jmaVal[1] ? -1 : 0
+plot(showGemini ? jmaVal : na, "JMA", color=C_GEMINI, linewidth=2)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.11 Hidden Markov Model Regime (Regime)
+// ───────────────────────────────────────────────────────────────────────────
+grpGEM4 = "💎 GEMINI — Regime Indicators"
+hmmLen  = input.int(20, "HMM Length", minval=10, maxval=50, group=grpGEM4)
+hmmRet  = ta.change(close, 1) / close[1] * 100
+hmmVol  = f_stdev(hmmRet, hmmLen)
+hmmUpProb = hmmRet > 0 ? 1 - math.normalcdf(hmmRet, 0, hmmVol) : 0
+hmmDnProb = hmmRet < 0 ? math.normalcdf(hmmRet, 0, hmmVol) : 0
+hmmRegime = hmmUpProb > 0.7 ? 1 : hmmDnProb > 0.7 ? -1 : 0
+plot(showGemini ? hmmRegime : na, "HMM Regime", color=C_GEMINI, style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.12 Volatility Regime Detector (Regime)
+// ───────────────────────────────────────────────────────────────────────────
+vrdLen  = input.int(20, "VRD Length", minval=10, maxval=50, group=grpGEM4)
+vrdAtr  = f_atr(vrdLen)
+vrdAtrAvg = f_sma(vrdAtr, vrdLen)
+vrdRatio = vrdAtr / (vrdAtrAvg + 0.0001)
+vrdRegime = vrdRatio > 1.5 ? (close > f_ema(close, vrdLen) ? 1 : -1) : 0
+plot(showGemini ? vrdRegime : na, "Vol Regime", color=color.new(C_GEMINI, 30), style=plot.style_columns, histbase=0)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.13 Historical Volatility Cone (Volatility)
+// ───────────────────────────────────────────────────────────────────────────
+grpGEM5 = "💎 GEMINI — Volatility Indicators"
+hvcLen  = input.int(20, "HVC Length", minval=10, maxval=50, group=grpGEM5)
+hvcRet  = ta.change(close, 1) / close[1]
+hvcVol  = f_stdev(hvcRet, hvcLen) * math.sqrt(252) * 100
+hvcMax  = f_hhv(hvcVol, hvcLen * 2)
+hvcMin  = f_llv(hvcVol, hvcLen * 2)
+hvcPct  = (hvcVol - hvcMin) / (hvcMax - hvcMin + 0.0001) * 100
+hvcSignal = hvcPct < 20 and close > f_ema(close, hvcLen) ? 1 : hvcPct > 80 and close < f_ema(close, hvcLen) ? -1 : 0
+plot(showGemini ? hvcVol : na, "HV Cone", color=C_GEMINI)
+plot(showGemini ? hvcMax : na, "HV Max", color=color.new(C_BEAR, 70))
+plot(showGemini ? hvcMin : na, "HV Min", color=color.new(C_BULL, 70))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.14 Bollinger Band Width Percentile (Volatility)
+// ───────────────────────────────────────────────────────────────────────────
+bbwpLen = input.int(20, "BBWP Length", minval=10, maxval=50, group=grpGEM5)
+bbwpMult = input.float(2.0, "BBWP Multiplier", minval=0.5, maxval=4.0, step=0.1, group=grpGEM5)
+[bbwpMid, bbwpUpper, bbwpLower] = f_bb(close, bbwpLen, bbwpMult)
+bbwpWidth = (bbwpUpper - bbwpLower) / bbwpMid * 100
+bbwpHist = 0.0
+for i = 0 to bbwpLen * 2 - 1
+    bbwpHist := bbwpHist + (bbwpWidth[i] < bbwpWidth ? 1 : 0)
+bbwpPct = bbwpHist / (bbwpLen * 2) * 100
+bbwpSignal = bbwpPct < 10 and close > bbwpMid ? 1 : bbwpPct > 90 and close < bbwpMid ? -1 : 0
+plot(showGemini ? bbwpPct : na, "BBWP", color=C_GEMINI)
+hline(10, "BBWP 10%", color=color.new(C_BULL, 70))
+hline(90, "BBWP 90%", color=color.new(C_BEAR, 70))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 2.15 Adaptive Trend Filter (ATF) (Trend)
+// ───────────────────────────────────────────────────────────────────────────
+grpGEM6 = "💎 GEMINI — Trend Indicators"
+atfLen  = input.int(14, "ATF Length", minval=5, maxval=50, group=grpGEM6)
+atfEff  = input.float(0.5, "ATF Efficiency", minval=0.1, maxval=1.0, step=0.1, group=grpGEM6)
+atfPrice = close
+atfDir  = math.abs(atfPrice - atfPrice[atfLen])
+atfVol  = 0.0
+for i = 0 to atfLen - 1
+    atfVol := atfVol + math.abs(atfPrice[i] - atfPrice[i + 1])
+atfEfficiency = atfDir / (atfVol + 0.0001)
+atfFast = math.max(math.round(atfEfficiency * atfLen), 2)
+atfSlow = atfLen
+atfFastMa = f_ema(close, int(atfFast))
+atfSlowMa = f_ema(close, int(atfSlow))
+atfSignal = atfFastMa > atfSlowMa ? 1 : atfFastMa < atfSlowMa ? -1 : 0
+plot(showGemini ? atfFastMa : na, "ATF Fast", color=C_GEMINI)
+plot(showGemini ? atfSlowMa : na, "ATF Slow", color=color.new(C_TEXT_DIM, 0))
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+// PAGE 3: KIMI 🔥 — SMART MONEY + MARKET BREADTH + INDIA SPECIFIC + OPTIONS (15 Indicators)
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+
+showKimi = aiPage == 3 or showAll
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.1 ICT Killzone Highlighter (Smart Money)
+// ───────────────────────────────────────────────────────────────────────────
+grpKIM1 = "🔥 KIMI — Smart Money Indicators"
+ictTz   = input.string("Asia", "ICT Timezone", options=["Asia", "London", "NY", "All"], group=grpKIM1)
+
+f_ictSession(tz) =>
+    hour = hour(time, "UTC+5:30")
+    minute = minute(time, "UTC+5:30")
+    timeVal = hour * 100 + minute
+    asia = timeVal >= 900 and timeVal <= 1130
+    london = timeVal >= 1130 and timeVal <= 1530
+    ny = timeVal >= 1530 and timeVal <= 1930
+    tz == "Asia" ? asia : tz == "London" ? london : tz == "NY" ? ny : asia or london or ny
+
+ictActive = f_ictSession(ictTz)
+ictSignal = ictActive ? (close > open ? 1 : close < open ? -1 : 0) : 0
+bgcolor(showKimi and ictActive ? color.new(C_KIMI, 90) : na, title="ICT Killzone")
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.2 Market Structure Shift (MSS/BOS/ChoCH) (Smart Money)
+// ───────────────────────────────────────────────────────────────────────────
+mssLen  = input.int(5, "MSS Swing Length", minval=3, maxval=20, group=grpKIM1)
+mssHH   = ta.pivothigh(high, mssLen, mssLen)
+mssLL   = ta.pivotlow(low, mssLen, mssLen)
+mssBull = close > mssHH[1] and not na(mssHH[1]) ? 1 : 0
+mssBear = close < mssLL[1] and not na(mssLL[1]) ? -1 : 0
+mssSignal = mssBull == 1 ? 1 : mssBear == -1 ? -1 : 0
+plotshape(showKimi and mssBull == 1 ? high : na, "MSS Bull", style=shape.triangleup, location=location.abovebar, color=C_KIMI, size=size.small)
+plotshape(showKimi and mssBear == -1 ? low : na, "MSS Bear", style=shape.triangledown, location=location.belowbar, color=C_BEAR, size=size.small)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.3 Premium and Discount Zones (Smart Money)
+// ───────────────────────────────────────────────────────────────────────────
+pdzLen  = input.int(20, "PDZ Lookback", minval=10, maxval=50, group=grpKIM1)
+pdzMid  = (ta.highest(high, pdzLen) + ta.lowest(low, pdzLen)) / 2
+pdzRange = ta.highest(high, pdzLen) - ta.lowest(low, pdzLen)
+pdzPremium = pdzMid + pdzRange * 0.25
+pdzDiscount = pdzMid - pdzRange * 0.25
+pdzSignal = close > pdzPremium ? -1 : close < pdzDiscount ? 1 : 0
+plot(showKimi ? pdzPremium : na, "Premium", color=color.new(C_BEAR, 50))
+plot(showKimi ? pdzDiscount : na, "Discount", color=color.new(C_BULL, 50))
+plot(showKimi ? pdzMid : na, "PDZ Mid", color=color.new(C_KIMI, 50))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.4 Equal Highs Lows Detector (Smart Money)
+// ───────────────────────────────────────────────────────────────────────────
+ehlLen  = input.int(5, "EHL Tolerance", minval=2, maxval=10, group=grpKIM1)
+ehlEqHigh = 0
+ehlEqLow  = 0
+for i = 1 to ehlLen
+    ehlEqHigh := math.abs(high - high[i]) < atr(14) * 0.1 ? ehlEqHigh + 1 : ehlEqHigh
+    ehlEqLow  := math.abs(low - low[i]) < atr(14) * 0.1 ? ehlEqLow + 1 : ehlEqLow
+ehlSignal = ehlEqHigh >= 2 ? -1 : ehlEqLow >= 2 ? 1 : 0
+plotshape(showKimi and ehlEqHigh >= 2 ? high : na, "Eq High", style=shape.labeldown, location=location.abovebar, color=color.new(C_BEAR, 0), text="EQH", textcolor=color.white, size=size.tiny)
+plotshape(showKimi and ehlEqLow >= 2 ? low : na, "Eq Low", style=shape.labelup, location=location.belowbar, color=color.new(C_BULL, 0), text="EQL", textcolor=color.white, size=size.tiny)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.5 Inducement Zone Scanner (Smart Money)
+// ───────────────────────────────────────────────────────────────────────────
+izLen   = input.int(10, "IZ Lookback", minval=5, maxval=30, group=grpKIM1)
+izSwing = ta.pivotlow(low, izLen, izLen)
+izZone  = 0.0
+izZone := nz(izSwing) != 0 ? izSwing : izZone[1]
+izSignal = close < izZone * 1.005 and close > izZone * 0.995 and close > close[1] ? 1 : close > izZone * 0.995 and close < izZone * 1.005 and close < close[1] ? -1 : 0
+plot(showKimi ? izZone : na, "Inducement Zone", color=color.new(C_KIMI, 50), style=plot.style_line)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.6 Advance Decline Line (NSE) (Market Breadth)
+// ───────────────────────────────────────────────────────────────────────────
+grpKIM2 = "🔥 KIMI — Market Breadth Indicators"
+adlAdv  = input.symbol("NSE:NIFTY", "NSE Advance Symbol", group=grpKIM2)
+adlDec  = input.symbol("NSE:BANKNIFTY", "NSE Decline Symbol", group=grpKIM2)
+
+// Using current symbol as proxy (true ADL needs market-wide data)
+adlUp   = close > open ? 1 : 0
+adlDown = close < open ? 0 : 1
+adlNet  = adlUp - adlDown
+adlCum  = ta.cum(adlNet)
+adlSignal = adlCum > adlCum[1] ? 1 : adlCum < adlCum[1] ? -1 : 0
+plot(showKimi ? adlCum : na, "AD Line", color=C_KIMI)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.7 McClellan Oscillator (Market Breadth)
+// ───────────────────────────────────────────────────────────────────────────
+mcoFast = input.int(19, "MCO Fast EMA", minval=5, maxval=50, group=grpKIM2)
+mcoSlow = input.int(39, "MCO Slow EMA", minval=10, maxval=100, group=grpKIM2)
+mcoAdv  = close > open ? 1 : 0
+mcoDec  = close < open ? 1 : 0
+mcoNet  = mcoAdv - mcoDec
+mcoFastEma = f_ema(mcoNet, mcoFast)
+mcoSlowEma = f_ema(mcoNet, mcoSlow)
+mcoVal  = mcoFastEma - mcoSlowEma
+mcoSignal = mcoVal > 0 and mcoVal > mcoVal[1] ? 1 : mcoVal < 0 and mcoVal < mcoVal[1] ? -1 : 0
+plot(showKimi ? mcoVal : na, "McClellan", color=C_KIMI, style=plot.style_histogram)
+hline(0, "MCO Zero", color=C_TEXT_DIM)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.8 McClellan Summation Index (Market Breadth)
+// ───────────────────────────────────────────────────────────────────────────
+msiVal  = ta.cum(mcoVal)
+msiSignal = msiVal > msiVal[1] ? 1 : msiVal < msiVal[1] ? -1 : 0
+plot(showKimi ? msiVal : na, "MSI", color=C_KIMI)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.9 New Highs New Lows Scanner (Market Breadth)
+// ───────────────────────────────────────────────────────────────────────────
+nhnlLen = input.int(20, "NHNL Lookback", minval=10, maxval=50, group=grpKIM2)
+nhnlHigh = close == ta.highest(close, nhnlLen) ? 1 : 0
+nhnlLow  = close == ta.lowest(close, nhnlLen) ? 1 : 0
+nhnlNet  = nhnlHigh - nhnlLow
+nhnlSignal = nhnlNet > 0 ? 1 : nhnlNet < 0 ? -1 : 0
+plot(showKimi ? nhnlNet : na, "NH/NL", color=C_KIMI, style=plot.style_histogram)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.10 Bullish Percent Index (Market Breadth)
+// ───────────────────────────────────────────────────────────────────────────
+bpiLen  = input.int(14, "BPI SMA Length", minval=5, maxval=30, group=grpKIM2)
+bpiPmo  = close > f_sma(close, bpiLen) ? 1 : 0
+bpiTotal = 1
+bpiVal  = bpiPmo / bpiTotal * 100
+bpiSignal = bpiVal > 70 ? 1 : bpiVal < 30 ? -1 : 0
+plot(showKimi ? bpiVal : na, "BPI", color=C_KIMI)
+hline(70, "BPI 70%", color=color.new(C_BULL, 70))
+hline(30, "BPI 30%", color=color.new(C_BEAR, 70))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.11 India VIX Oscillator (India Specific)
+// ───────────────────────────────────────────────────────────────────────────
+grpKIM3 = "🔥 KIMI — India Specific Indicators"
+vixSym  = input.symbol("NSE:INDIAVIX", "India VIX Symbol", group=grpKIM3)
+vixLen  = input.int(14, "VIX EMA Length", minval=5, maxval=30, group=grpKIM3)
+
+// Using ATR as proxy for VIX when symbol unavailable
+vixProxy = f_atr(vixLen) / close * 100
+vixEma  = f_ema(vixProxy, vixLen)
+vixSignal = vixProxy > vixEma * 1.2 ? -1 : vixProxy < vixEma * 0.8 ? 1 : 0
+plot(showKimi ? vixProxy : na, "India VIX Proxy", color=C_KIMI)
+plot(showKimi ? vixEma : na, "VIX EMA", color=color.new(C_TEXT_DIM, 0))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.12 Put Call Ratio (PCR) Indicator (Options)
+// ───────────────────────────────────────────────────────────────────────────
+grpKIM4 = "🔥 KIMI — Options Indicators"
+pcrLen  = input.int(10, "PCR EMA Length", minval=5, maxval=30, group=grpKIM4)
+pcrProxy = volume / (ta.highest(volume, pcrLen) + 0.0001)  // Proxy using volume distribution
+pcrEma  = f_ema(pcrProxy, pcrLen)
+pcrSignal = pcrProxy > pcrEma * 1.2 ? -1 : pcrProxy < pcrEma * 0.8 ? 1 : 0
+plot(showKimi ? pcrProxy : na, "PCR Proxy", color=C_KIMI)
+hline(1.0, "PCR Neutral", color=C_TEXT_DIM)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.13 NSE Delivery Percent Scanner (India Specific)
+// ───────────────────────────────────────────────────────────────────────────
+delLen  = input.int(20, "Delivery Lookback", minval=10, maxval=50, group=grpKIM3)
+delVol  = f_sma(volume, delLen)
+delPct  = volume / (delVol + 0.0001) * 50  // Proxy: high volume = high delivery %
+delSignal = delPct > 80 ? 1 : delPct < 20 ? -1 : 0
+plot(showKimi ? delPct : na, "Delivery %", color=C_KIMI)
+hline(80, "High Delivery", color=color.new(C_BULL, 70))
+hline(20, "Low Delivery", color=color.new(C_BEAR, 70))
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.14 FII DII Flow Indicator (India Specific)
+// ───────────────────────────────────────────────────────────────────────────
+fiiLen  = input.int(20, "FII/DII Lookback", minval=10, maxval=50, group=grpKIM3)
+fiiFlow = close > open and volume > f_sma(volume, fiiLen) ? 1 : close < open and volume > f_sma(volume, fiiLen) ? -1 : 0
+fiiCum  = ta.cum(fiiFlow)
+fiiSignal = fiiCum > fiiCum[1] ? 1 : fiiCum < fiiCum[1] ? -1 : 0
+plot(showKimi ? fiiCum : na, "FII/DII Flow", color=C_KIMI, style=plot.style_histogram)
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.15 Implied Volatility Rank (IVR) (Options)
+// ───────────────────────────────────────────────────────────────────────────
+ivrLen  = input.int(52, "IVR Length (Weeks)", minval=20, maxval=100, group=grpKIM4)
+ivrProxy = f_stdev(close, 20) / f_sma(close, 20) * 100  // Historical vol proxy
+ivrMin  = f_llv(ivrProxy, ivrLen)
+ivrMax  = f_hhv(ivrProxy, ivrLen)
+ivrVal  = (ivrProxy - ivrMin) / (ivrMax - ivrMin + 0.0001) * 100
+ivrSignal = ivrVal < 20 ? 1 : ivrVal > 80 ? -1 : 0
+plot(showKimi ? ivrVal : na, "IVR", color=C_KIMI)
+hline(20, "IVR Low", color=color.new(C_BULL, 70))
+hline(80, "IVR High", color=color.new(C_BEAR, 70))
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+// COMBINED SIGNAL AGGREGATOR & TRAILING STOP ENGINE
+// ═════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+
+// Aggregate all signals based on active page
+allSignals = array.new_int(0)
+if showChatGPT
+    array.push(allSignals, tftSignal)
+    array.push(allSignals, xgbSignal)
+    array.push(allSignals, lgbSignal)
+    array.push(allSignals, rfRegime)
+    array.push(allSignals, nnSignal)
+    array.push(allSignals, ofiSignal)
+    array.push(allSignals, stkSignal)
+    array.push(allSignals, deltaSig)
+    array.push(allSignals, absSignal)
+    array.push(allSignals, spdSignal)
+    array.push(allSignals, kvoSignal)
+    array.push(allSignals, efiSignal)
+    array.push(allSignals, vwrsiSignal)
+    array.push(allSignals, obvSignal)
+    array.push(allSignals, evrSignal)
+
+if showGemini
+    array.push(allSignals, lpfSignal)
+    array.push(allSignals, autoSignal)
+    array.push(allSignals, ucbSignal)
+    array.push(allSignals, dadxSignal)
+    array.push(allSignals, dcSignal)
+    array.push(allSignals, kfSignal)
+    array.push(allSignals, essSignal)
+    array.push(allSignals, zltSignal)
+    array.push(allSignals, mgSignal)
+    array.push(allSignals, jmaSignal)
+    array.push(allSignals, hmmRegime)
+    array.push(allSignals, vrdRegime)
+    array.push(allSignals, hvcSignal)
+    array.push(allSignals, bbwpSignal)
+    array.push(allSignals, atfSignal)
+
+if showKimi
+    array.push(allSignals, ictSignal)
+    array.push(allSignals, mssSignal)
+    array.push(allSignals, pdzSignal)
+    array.push(allSignals, ehlSignal)
+    array.push(allSignals, izSignal)
+    array.push(allSignals, adlSignal)
+    array.push(allSignals, mcoSignal)
+    array.push(allSignals, msiSignal)
+    array.push(allSignals, nhnlSignal)
+    array.push(allSignals, bpiSignal)
+    array.push(allSignals, vixSignal)
+    array.push(allSignals, pcrSignal)
+    array.push(allSignals, delSignal)
+    array.push(allSignals, fiiSignal)
+    array.push(allSignals, ivrSignal)
+
+// Count bullish/bearish signals
+bullCount = 0
+bearCount = 0
+neutralCount = 0
+for i = 0 to array.size(allSignals) - 1
+    sig = array.get(allSignals, i)
+    bullCount := sig == 1 ? bullCount + 1 : bullCount
+    bearCount := sig == -1 ? bearCount + 1 : bearCount
+    neutralCount := sig == 0 ? neutralCount + 1 : neutralCount
+
+totalActive = bullCount + bearCount + neutralCount
+bullPct = totalActive > 0 ? bullCount / totalActive * 100 : 0
+bearPct = totalActive > 0 ? bearCount / totalActive * 100 : 0
+
+// Final consensus signal
+consensusSignal = bullPct > 60 ? 1 : bearPct > 60 ? -1 : 0
+
+// ───────────────────────────────────────────────────────────────────────────
+// TRAILING STOP LOSS EXECUTION
+// ───────────────────────────────────────────────────────────────────────────
+var float entryPrice = na
+var bool inLong = false
+var bool inShort = false
+
+if consensusSignal == 1 and not inLong
+    entryPrice := close
+    inLong := true
+    inShort := false
+    highestHigh := close
+    trailStop := close * (1 - trailPct / 100)
+
+if consensusSignal == -1 and not inShort
+    entryPrice := close
+    inShort := true
+    inLong := false
+    lowestLow := close
+    trailStop := close * (1 + trailPct / 100)
+
+// Update trailing stops
+if inLong
+    highestHigh := math.max(nz(highestHigh), high)
+    trailStop := math.max(trailStop, highestHigh * (1 - trailPct / 100))
+    if close < trailStop
+        inLong := false
+        highestHigh := na
+
+if inShort
+    lowestLow := math.min(nz(lowestLow), low)
+    trailStop := math.min(trailStop, lowestLow * (1 + trailPct / 100))
+    if close > trailStop
+        inShort := false
+        lowestLow := na
+
+// ───────────────────────────────────────────────────────────────────────────
+// DARK MOBILE UI PANEL
+// ───────────────────────────────────────────────────────────────────────────
+var table infoPanel = table.new(position.top_left, 3, 8, bgcolor=C_PANEL, border_width=1, border_color=C_BORDER, frame_width=1)
+
+pageName = aiPage == 1 ? "🤖 CHATGPT" : aiPage == 2 ? "💎 GEMINI" : "🔥 KIMI"
+pageColor = aiPage == 1 ? C_BULL : aiPage == 2 ? C_GEMINI : C_KIMI
+
+table.cell(infoPanel, 0, 0, "AI SCANNER v5.0", text_color=pageColor, text_size=size.normal)
+table.cell(infoPanel, 1, 0, pageName, text_color=pageColor, text_size=size.normal)
+table.cell(infoPanel, 2, 0, str.tostring(totalActive) + " Active", text_color=C_TEXT_DIM, text_size=size.small)
+
+table.cell(infoPanel, 0, 1, "BULLISH", text_color=C_BULL, text_size=size.small)
+table.cell(infoPanel, 1, 1, str.tostring(bullCount) + " (" + str.tostring(bullPct, "#.#") + "%)", text_color=C_BULL, text_size=size.small)
+table.cell(infoPanel, 2, 1, inLong ? "▲ IN LONG" : "—", text_color=inLong ? C_BULL : C_TEXT_DIM, text_size=size.small)
+
+table.cell(infoPanel, 0, 2, "BEARISH", text_color=C_BEAR, text_size=size.small)
+table.cell(infoPanel, 1, 2, str.tostring(bearCount) + " (" + str.tostring(bearPct, "#.#") + "%)", text_color=C_BEAR, text_size=size.small)
+table.cell(infoPanel, 2, 2, inShort ? "▼ IN SHORT" : "—", text_color=inShort ? C_BEAR : C_TEXT_DIM, text_size=size.small)
+
+table.cell(infoPanel, 0, 3, "NEUTRAL", text_color=C_TEXT_DIM, text_size=size.small)
+table.cell(infoPanel, 1, 3, str.tostring(neutralCount), text_color=C_TEXT_DIM, text_size=size.small)
+table.cell(infoPanel, 2, 3, "TS: " + str.tostring(trailPct, "#.#") + "%", text_color=C_WARN, text_size=size.small)
+
+table.cell(infoPanel, 0, 4, "CONSENSUS", text_color=C_TEXT, text_size=size.small)
+consensusText = consensusSignal == 1 ? "STRONG BUY" : consensusSignal == -1 ? "STRONG SELL" : "NEUTRAL"
+consensusCol = consensusSignal == 1 ? C_BULL : consensusSignal == -1 ? C_BEAR : C_NEUTRAL
+table.cell(infoPanel, 1, 4, consensusText, text_color=consensusCol, text_size=size.small)
+table.cell(infoPanel, 2, 4, "Trail: " + str.tostring(trailStop, "#.##"), text_color=C_WARN, text_size=size.small)
+
+// Signal strength bar
+table.cell(infoPanel, 0, 5, "STRENGTH", text_color=C_TEXT_DIM, text_size=size.small)
+strengthBar = ""
+for i = 0 to int(bullPct / 10) - 1
+    strengthBar := strengthBar + "█"
+for i = 0 to int(bearPct / 10) - 1
+    strengthBar := strengthBar + "░"
+table.cell(infoPanel, 1, 5, strengthBar, text_color=consensusCol, text_size=size.small)
+table.cell(infoPanel, 2, 5, "", text_color=C_TEXT_DIM, text_size=size.small)
+
+// Entry/Exit markers
+plotshape(inLong and not inLong[1], "Long Entry", style=shape.triangleup, location=location.belowbar, color=C_BULL, size=size.normal)
+plotshape(inShort and not inShort[1], "Short Entry", style=shape.triangledown, location=location.abovebar, color=C_BEAR, size=size.normal)
+plotshape(not inLong and inLong[1], "Long Exit", style=shape.xcross, location=location.abovebar, color=C_BEAR, size=size.small)
+plotshape(not inShort and inShort[1], "Short Exit", style=shape.xcross, location=location.belowbar, color=C_BULL, size=size.small)
+
+// Trailing stop line
+plot(inLong ? trailStop : na, "Trail Long", color=color.new(C_BULL, 30), style=plot.style_linebr, linewidth=2)
+plot(inShort ? trailStop : na, "Trail Short", color=color.new(C_BEAR, 30), style=plot.style_linebr, linewidth=2)
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ALERTS
+// ═════════════════════════════════════════════════════════════════════════════
+alertcondition(consensusSignal == 1 and not inLong[1], "AI Buy Signal", "Multi-AI Scanner: STRONG BUY Signal")
+alertcondition(consensusSignal == -1 and not inShort[1], "AI Sell Signal", "Multi-AI Scanner: STRONG SELL Signal")
+alertcondition(not inLong and inLong[1], "Long Exit", "Trailing Stop Hit - Exit Long")
+alertcondition(not inShort and inShort[1], "Short Exit", "Trailing Stop Hit - Exit Short")
+
+// ═════════════════════════════════════════════════════════════════════════════
+// END OF SCRIPT
+// ═════════════════════════════════════════════════════════════════════════════
